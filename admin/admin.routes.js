@@ -1,16 +1,7 @@
 import { Router } from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
 import requireAdmin from "./admin.middleware.js";
-import {
-    listUsers,
-    getUserById,
-    editUser,
-    deleteUser,
-    listRefunds,
-    getRefundById,
-    issueRefund,
-    updateRefundStatus,
-} from "./admin.controller.js";
+import AdminController from "./admin.controller.js";
 import {
     validateAdminIdParam,
     validateAdminPagination,
@@ -24,19 +15,24 @@ const router = Router();
 router.use(authMiddleware);
 router.use(requireAdmin);
 
-router.get("/users", validateAdminPagination, listUsers);
-router.get("/users/:id", validateAdminIdParam, getUserById);
-router.patch("/users/:id", validateAdminIdParam, validateEditUser, editUser);
-router.delete("/users/:id", validateAdminIdParam, deleteUser);
+router.get("/users", validateAdminPagination, AdminController.listUsers);
+router.get("/users/:id", validateAdminIdParam, AdminController.getUserById);
+router.patch(
+    "/users/:id",
+    validateAdminIdParam,
+    validateEditUser,
+    AdminController.editUser,
+);
+router.delete("/users/:id", validateAdminIdParam, AdminController.deleteUser);
 
-router.get("/refunds", validateAdminPagination, listRefunds);
-router.get("/refunds/:id", validateAdminIdParam, getRefundById);
-router.post("/refunds", validateIssueRefund, issueRefund);
+router.get("/refunds", validateAdminPagination, AdminController.listRefunds);
+router.get("/refunds/:id", validateAdminIdParam, AdminController.getRefundById);
+router.post("/refunds", validateIssueRefund, AdminController.issueRefund);
 router.patch(
     "/refunds/:id",
     validateAdminIdParam,
     validateUpdateRefundStatus,
-    updateRefundStatus,
+    AdminController.updateRefundStatus,
 );
 
 export default router;

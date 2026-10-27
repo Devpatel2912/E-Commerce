@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { register, login, getMe, refresh, logout } from "./auth.controller.js";
+import AuthController from "./auth.controller.js";
 
 import { registerValidator, loginValidator } from "./auth.validation.js";
 
@@ -10,10 +10,20 @@ import { authLimiter } from "../middleware/rateLimiter.middleware.js";
 
 const router = Router();
 
-router.post("/register", authLimiter, validate(registerValidator), register);
-router.post("/login", authLimiter, validate(loginValidator), login);
-router.get("/me", authMiddleware, getMe);
-router.post("/refresh", refresh);
-router.post("/logout", logout);
+router.post(
+    "/register",
+    authLimiter,
+    validate(registerValidator),
+    AuthController.register,
+);
+router.post(
+    "/login",
+    authLimiter,
+    validate(loginValidator),
+    AuthController.login,
+);
+router.get("/me", authMiddleware, AuthController.getMe);
+router.post("/refresh", AuthController.refresh);
+router.post("/logout", AuthController.logout);
 
 export default router;

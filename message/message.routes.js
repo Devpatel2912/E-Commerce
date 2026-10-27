@@ -2,13 +2,7 @@ import { Router } from "express";
 
 import { authenticateToken } from "../middleware/auth.middleware.js";
 
-import {
-    sendMessage,
-    listConversations,
-    listConversationMessages,
-    readMessage,
-    removeMessage,
-} from "./message.controller.js";
+import MessageController from "./message.controller.js";
 
 import {
     validateSendMessage,
@@ -20,14 +14,26 @@ const router = Router();
 
 router.use(authenticateToken);
 
-router.post("/", validateSendMessage, sendMessage);
+router.post("/", validateSendMessage, MessageController.sendMessage);
 
-router.get("/conversations", listConversations);
+router.get("/conversations", MessageController.listConversations);
 
-router.get("/conversation/:userId", validateUserId, listConversationMessages);
+router.get(
+    "/conversation/:userId",
+    validateUserId,
+    MessageController.listConversationMessages,
+);
 
-router.patch("/:messageId/read", validateMessageId, readMessage);
+router.patch(
+    "/:messageId/read",
+    validateMessageId,
+    MessageController.readMessage,
+);
 
-router.delete("/:messageId", validateMessageId, removeMessage);
+router.delete(
+    "/:messageId",
+    validateMessageId,
+    MessageController.removeMessage,
+);
 
 export default router;

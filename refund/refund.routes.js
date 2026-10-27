@@ -1,19 +1,14 @@
 import { Router } from "express";
-import {
-    requestRefund,
-    listRefunds,
-    getRefundDetails,
-    processRefund,
-} from "./refund.controller.js";
+import RefundController from "./refund.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 router.use(authMiddleware);
 
-router.post("/", requestRefund);
-router.get("/", listRefunds);
-router.get("/:id", getRefundDetails);
-router.post("/:id/process", processRefund);
+router.post("/", RefundController.requestRefund);
+router.get("/", RefundController.listRefunds);
+router.get("/:id", RefundController.getRefundDetails);
+router.post("/:id/process", RefundController.processRefund);
 
 export default router;

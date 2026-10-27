@@ -1,12 +1,6 @@
 import { Router } from "express";
 
-import {
-    createListing,
-    getAllListings,
-    getListingById,
-    updateListing,
-    deleteListing,
-} from "./listing.controller.js";
+import ListingController from "./listing.controller.js";
 
 import {
     validateCreateListing,
@@ -15,12 +9,8 @@ import {
 } from "./listing.validation.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
-import { getListingReviews } from "../review/review.controller.js";
-import {
-    retrieveListingImages,
-    removeListingImage,
-    uploadListingImage,
-} from "../listing-image/listing-image.controller.js";
+import ReviewController from "../review/review.controller.js";
+import ListingImageController from "../listing-image/listing-image.controller.js";
 
 import multer from "multer";
 
@@ -34,35 +24,49 @@ const upload = multer({
     },
 });
 
-router.get("/", getAllListings);
-router.get("/:id", validateListingId, getListingById);
-router.get("/:id/reviews", getListingReviews);
-router.get("/:id/images", validateListingId, retrieveListingImages);
+router.get("/", ListingController.getAllListings);
+router.get("/:id", validateListingId, ListingController.getListingById);
+router.get("/:id/reviews", ReviewController.getListingReviews);
+router.get(
+    "/:id/images",
+    validateListingId,
+    ListingImageController.retrieveListingImages,
+);
 
 router.post(
     "/:id/images",
     authMiddleware,
     validateListingId,
     upload.single("image"),
-    uploadListingImage,
+    ListingImageController.uploadListingImage,
 );
 router.delete(
     "/:id/images/:imageId",
     authMiddleware,
     validateListingId,
-    removeListingImage,
+    ListingImageController.removeListingImage,
 );
 
-router.post("/", authMiddleware, validateCreateListing, createListing);
+router.post(
+    "/",
+    authMiddleware,
+    validateCreateListing,
+    ListingController.createListing,
+);
 
 router.patch(
     "/:id",
     authMiddleware,
     validateListingId,
     validateUpdateListing,
-    updateListing,
+    ListingController.updateListing,
 );
 
-router.delete("/:id", authMiddleware, validateListingId, deleteListing);
+router.delete(
+    "/:id",
+    authMiddleware,
+    validateListingId,
+    ListingController.deleteListing,
+);
 
 export default router;

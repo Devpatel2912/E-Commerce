@@ -1,14 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 
-import {
-    presignListingImageUpload,
-    completeListingImageUpload,
-    retrieveListingImages,
-    removeListingImage,
-    getListingImageAccessUrl,
-    uploadListingImage,
-} from "./listing-image.controller.js";
+import ListingImageController from "./listing-image.controller.js";
 
 import {
     validatePresignRequest,
@@ -33,36 +26,40 @@ router.post(
     "/upload",
     authMiddleware,
     upload.single("image"),
-    uploadListingImage,
+    ListingImageController.uploadListingImage,
 );
 
 router.post(
     "/presign",
     authMiddleware,
     validatePresignRequest,
-    presignListingImageUpload,
+    ListingImageController.presignListingImageUpload,
 );
 
 router.post(
     "/complete",
     authMiddleware,
     validateCompleteRequest,
-    completeListingImageUpload,
+    ListingImageController.completeListingImageUpload,
 );
 
 router.get(
     "/listing/:listingId",
     validateListingIdParam,
-    retrieveListingImages,
+    ListingImageController.retrieveListingImages,
 );
 
-router.get("/:imageId/url", validateImageIdParam, getListingImageAccessUrl);
+router.get(
+    "/:imageId/url",
+    validateImageIdParam,
+    ListingImageController.getListingImageAccessUrl,
+);
 
 router.delete(
     "/:imageId",
     authMiddleware,
     validateImageIdParam,
-    removeListingImage,
+    ListingImageController.removeListingImage,
 );
 
 export default router;

@@ -1,12 +1,6 @@
 import { Router } from "express";
 
-import {
-    createCategory,
-    getAllCategories,
-    getCategoryById,
-    updateCategory,
-    deleteCategory,
-} from "./category.controller.js";
+import CategoryController from "./category.controller.js";
 
 import {
     validateCategory,
@@ -18,19 +12,29 @@ import authMiddleware from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.get("/", getAllCategories);
-router.get("/:id", validateCategoryId, getCategoryById);
+router.get("/", CategoryController.getAllCategories);
+router.get("/:id", validateCategoryId, CategoryController.getCategoryById);
 
-router.post("/", authMiddleware, validateCategory, createCategory);
+router.post(
+    "/",
+    authMiddleware,
+    validateCategory,
+    CategoryController.createCategory,
+);
 
 router.patch(
     "/:id",
     authMiddleware,
     validateCategoryId,
     validateCategoryUpdate,
-    updateCategory,
+    CategoryController.updateCategory,
 );
 
-router.delete("/:id", authMiddleware, validateCategoryId, deleteCategory);
+router.delete(
+    "/:id",
+    authMiddleware,
+    validateCategoryId,
+    CategoryController.deleteCategory,
+);
 
 export default router;

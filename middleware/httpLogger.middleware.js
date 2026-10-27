@@ -24,6 +24,7 @@ export const sanitizeData = (data) => {
   if (Array.isArray(data)) return data.map(sanitizeData);
 
   const sanitized = {};
+
   for (const [key, value] of Object.entries(data)) {
     if (
       SENSITIVE_KEYS.has(key.toLowerCase()) ||
@@ -36,48 +37,64 @@ export const sanitizeData = (data) => {
       sanitized[key] = value;
     }
   }
+
   return sanitized;
 };
 
 const pinoHttpMiddleware = pinoHttp({
   logger: baseLogger || logger,
+
   customAttributeKeys: {
     err: "error",
   },
+
   genReqId: (req, res) => {
     const incoming = req.headers["x-request-id"];
+
     const id =
       typeof incoming === "string" && incoming.length > 0
         ? incoming
         : randomUUID();
+
     res.setHeader("x-request-id", id);
     req.id = id;
     req.requestId = id;
+
     return id;
   },
+
   customLogLevel: (_req, res, err) => {
     if (err || res.statusCode >= 500) {
       return "error";
     }
+
     if (res.statusCode >= 400) {
       return "warn";
     }
+
     return "info";
   },
+
   customSuccessMessage: (req, res) =>
     `${req.method} ${req.url} ${res.statusCode}`,
+
   customErrorMessage: (req, res, err) =>
     `${req.method} ${req.url} ${res.statusCode} - ${err.message}`,
-  customReceivedMessage: (req, res) => `Incoming ${req.method} ${req.url}`,
+
+  customReceivedMessage: (req) => `Incoming ${req.method} ${req.url}`,
+
   customProps: (req, res) => ({
     params:
       req.params && Object.keys(req.params).length > 0 ? req.params : undefined,
+
     query:
       req.query && Object.keys(req.query).length > 0 ? req.query : undefined,
+
     requestBody:
       req.body && Object.keys(req.body).length > 0
         ? sanitizeData(req.body)
         : undefined,
+
     responseBody: res.responseBody ? sanitizeData(res.responseBody) : undefined,
   }),
 });
@@ -103,7 +120,9 @@ export const httpLogger = (req, res, next) => {
         requestId: req.id,
         meta,
       });
+
       res.responseBody = envelope;
+
       return originalJson(envelope);
     };
 
@@ -114,11 +133,11 @@ export const httpLogger = (req, res, next) => {
         if (!body.errors.request_id) {
           body.errors.request_id = req.id;
         }
-        finalBody = body;
       } else if (body instanceof ApiResponse) {
         finalBody = body.toEnvelope(req);
       } else if (body && typeof body === "object" && body.success === false) {
         const statusCode = Number(body.statusCode || res.statusCode || 500);
+
         finalBody = createErrorEnvelope({
           statusCode,
           errorCode:
@@ -130,6 +149,7 @@ export const httpLogger = (req, res, next) => {
         });
       } else if (body && typeof body === "object" && body.success === true) {
         const statusCode = Number(body.statusCode || res.statusCode || 200);
+
         finalBody = createResponseEnvelope({
           statusCode,
           message: body.message || "Operation successful.",
@@ -140,6 +160,7 @@ export const httpLogger = (req, res, next) => {
         });
       } else {
         const statusCode = Number(res.statusCode || 200);
+
         if (statusCode >= 400) {
           finalBody = createErrorEnvelope({
             statusCode,
@@ -164,6 +185,7 @@ export const httpLogger = (req, res, next) => {
       }
 
       res.responseBody = finalBody;
+
       return originalJson(finalBody);
     };
 
@@ -176,6 +198,7 @@ export const httpLogger = (req, res, next) => {
           res.responseBody = chunk;
         }
       }
+
       return originalSend(chunk);
     };
 

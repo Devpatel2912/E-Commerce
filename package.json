@@ -31,7 +31,9 @@
     "migrate": "node migrations/migrate.js",
     "seed": "node seed.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint .",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -42,7 +44,18 @@
     "eslint": "^10.13.0",
     "eslint-config-xo": "^7.0.0",
     "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "prettier": "3.9.10",
     "typescript": "^6.0.3"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
   }
 }

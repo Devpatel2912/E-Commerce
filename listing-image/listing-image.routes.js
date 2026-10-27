@@ -33,40 +33,36 @@ router.post(
   "/upload",
   authMiddleware,
   upload.single("image"),
-  uploadListingImage
+  uploadListingImage,
 );
 
 router.post(
   "/presign",
   authMiddleware,
   validatePresignRequest,
-  presignListingImageUpload
+  presignListingImageUpload,
 );
 
 router.post(
   "/complete",
   authMiddleware,
   validateCompleteRequest,
-  completeListingImageUpload
+  completeListingImageUpload,
 );
 
 router.get(
   "/listing/:listingId",
   validateListingIdParam,
-  retrieveListingImages
+  retrieveListingImages,
 );
 
-router.get(
-  "/:imageId/url",
-  validateImageIdParam,
-  getListingImageAccessUrl
-);
+router.get("/:imageId/url", validateImageIdParam, getListingImageAccessUrl);
 
 router.delete(
   "/:imageId",
   authMiddleware,
   validateImageIdParam,
-  removeListingImage
+  removeListingImage,
 );
 
 export default router;

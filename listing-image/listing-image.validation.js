@@ -32,7 +32,7 @@ export const validatePresignRequest = (req, res, next) => {
     errors.push("content_type is required.");
   } else if (!ALLOWED_IMAGE_MIME_TYPES.has(contentType.trim().toLowerCase())) {
     errors.push(
-      "Only JPEG, PNG, and WebP images are permitted (image/jpeg, image/png, image/webp)."
+      "Only JPEG, PNG, and WebP images are permitted (image/jpeg, image/png, image/webp).",
     );
   }
 
@@ -49,14 +49,18 @@ export const validatePresignRequest = (req, res, next) => {
     errors.push(`file_size exceeds the maximum allowed limit of ${maxMb}MB.`);
   }
 
-  if (filename && contentType && ALLOWED_IMAGE_MIME_TYPES.has(contentType.trim().toLowerCase())) {
+  if (
+    filename &&
+    contentType &&
+    ALLOWED_IMAGE_MIME_TYPES.has(contentType.trim().toLowerCase())
+  ) {
     const ext = path.extname(filename).toLowerCase().replace(".", "");
     const normalizedExt = ext === "jpeg" ? "jpg" : ext;
     const expectedExt = MIME_TO_EXTENSION[contentType.trim().toLowerCase()];
 
     if (normalizedExt !== expectedExt) {
       errors.push(
-        `File extension '.${ext}' does not match content_type '${contentType}'. Expected '.${expectedExt}'.`
+        `File extension '.${ext}' does not match content_type '${contentType}'. Expected '.${expectedExt}'.`,
       );
     }
   }
@@ -104,7 +108,7 @@ export const validateCompleteRequest = (req, res, next) => {
     const expectedPrefix = `listings/${numericListingId}/`;
     if (!trimmedKey.startsWith(expectedPrefix)) {
       errors.push(
-        `object_key must belong to listing ${numericListingId} (expected prefix: ${expectedPrefix}).`
+        `object_key must belong to listing ${numericListingId} (expected prefix: ${expectedPrefix}).`,
       );
     }
   }

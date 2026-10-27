@@ -12,7 +12,7 @@ export const getAdminUsers = async ({
   if (search) {
     params.push(`%${search.trim()}%`);
     conditions.push(
-      `(name ILIKE $${params.length} OR email ILIKE $${params.length})`
+      `(name ILIKE $${params.length} OR email ILIKE $${params.length})`,
     );
   }
 
@@ -217,7 +217,7 @@ export const createAdminRefund = async ({
        FROM payments
        WHERE id = $1
        FOR UPDATE`,
-      [paymentId]
+      [paymentId],
     );
 
     if (paymentResult.rowCount === 0) {
@@ -233,7 +233,7 @@ export const createAdminRefund = async ({
        FROM refunds
        WHERE payment_id = $1
          AND LOWER(status) IN ('requested', 'pending', 'processing', 'completed', 'succeeded')`,
-      [paymentId]
+      [paymentId],
     );
 
     const alreadyRefunded = Number(existingResult.rows[0].total_refunded);
@@ -244,7 +244,7 @@ export const createAdminRefund = async ({
       const error = new Error(
         `Refund amount exceeds eligible remaining balance (${(
           paymentAmount - alreadyRefunded
-        ).toFixed(2)} remaining).`
+        ).toFixed(2)} remaining).`,
       );
       error.statusCode = 409;
       throw error;
@@ -254,7 +254,7 @@ export const createAdminRefund = async ({
       `INSERT INTO refunds (payment_id, amount, reason, status)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [paymentId, requestedAmount, reason, status]
+      [paymentId, requestedAmount, reason, status],
     );
 
     const refund = refundResult.rows[0];
@@ -264,14 +264,14 @@ export const createAdminRefund = async ({
         `UPDATE payments
          SET status = 'refunded', updated_at = NOW()
          WHERE id = $1`,
-        [paymentId]
+        [paymentId],
       );
 
       await client.query(
         `INSERT INTO transactions
            (payment_id, transaction_type, amount, currency, status)
          VALUES ($1, 'refund', $2, $3, 'completed')`,
-        [paymentId, requestedAmount, payment.currency || "INR"]
+        [paymentId, requestedAmount, payment.currency || "INR"],
       );
     }
 
@@ -287,7 +287,7 @@ export const createAdminRefund = async ({
 
 export const updateAdminRefundStatus = async (
   refundId,
-  { status, reason, providerRefundId }
+  { status, reason, providerRefundId },
 ) => {
   const client = await pool.connect();
 
@@ -300,7 +300,7 @@ export const updateAdminRefundStatus = async (
        INNER JOIN payments p ON p.id = r.payment_id
        WHERE r.id = $1
        FOR UPDATE OF r`,
-      [refundId]
+      [refundId],
     );
 
     if (refundResult.rowCount === 0) {
@@ -320,12 +320,7 @@ export const updateAdminRefundStatus = async (
          updated_at = NOW()
        WHERE id = $1
        RETURNING *`,
-      [
-        refundId,
-        status,
-        reason ?? null,
-        providerRefundId ?? null,
-      ]
+      [refundId, status, reason ?? null, providerRefundId ?? null],
     );
 
     if (
@@ -337,7 +332,7 @@ export const updateAdminRefundStatus = async (
         `UPDATE payments
          SET status = 'refunded', updated_at = NOW()
          WHERE id = $1`,
-        [currentRefund.payment_id]
+        [currentRefund.payment_id],
       );
 
       await client.query(
@@ -348,7 +343,7 @@ export const updateAdminRefundStatus = async (
           currentRefund.payment_id,
           currentRefund.amount,
           currentRefund.currency || "INR",
-        ]
+        ],
       );
     }
 

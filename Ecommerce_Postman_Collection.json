@@ -88,12 +88,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/health",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "health"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
             },
             "description": "Root health check to confirm server is running."
           },
@@ -120,14 +116,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/health",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "health"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "health"]
             },
             "description": "API v1 prefix health check."
           },
@@ -187,15 +177,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/register",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "register"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "register"]
             },
             "description": "Register a new user account. Returns user data and access token, setting the accessToken collection variable."
           },
@@ -250,15 +233,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
             },
             "description": "Login with standard user credentials. Automatically updates `accessToken` collection variable."
           },
@@ -310,15 +286,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
             },
             "description": "Login with Admin credentials (Admin / admin@gmail.com / admin123). Saves token to `adminToken` variable."
           },
@@ -355,15 +324,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/me",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "me"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "me"]
             },
             "description": "Get profile details of the authenticated user."
           },
@@ -390,15 +352,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/refresh",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "refresh"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "refresh"]
             },
             "description": "Refreshes the access token using the refreshToken HTTP-only cookie."
           },
@@ -425,15 +380,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/logout",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "logout"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "logout"]
             },
             "description": "Revokes the active refresh token and clears the refreshToken cookie."
           },
@@ -475,14 +423,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/users?page=1&limit=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"],
               "query": [
                 {
                   "key": "page",
@@ -529,15 +471,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}"]
             },
             "description": "Get specific user profile. User must be requesting their own profile unless admin."
           },
@@ -583,15 +518,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}"]
             },
             "description": "Update user profile details."
           },
@@ -628,15 +556,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "{{userId}}"]
             },
             "description": "Delete user account."
           },
@@ -668,14 +589,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/category",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "category"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "category"]
             },
             "description": "Retrieve all categories."
           },
@@ -702,15 +617,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/category/{{categoryId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "category",
-                "{{categoryId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "category", "{{categoryId}}"]
             },
             "description": "Get category by numeric ID."
           },
@@ -772,14 +680,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/category",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "category"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "category"]
             },
             "description": "Create a new product category."
           },
@@ -825,15 +727,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/category/{{categoryId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "category",
-                "{{categoryId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "category", "{{categoryId}}"]
             },
             "description": "Update category name and/or description."
           },
@@ -870,15 +765,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/category/{{categoryId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "category",
-                "{{categoryId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "category", "{{categoryId}}"]
             },
             "description": "Delete category by ID."
           },
@@ -910,14 +798,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings"]
             },
             "description": "Get all active product listings."
           },
@@ -944,15 +826,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings",
-                "{{listingId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings", "{{listingId}}"]
             },
             "description": "Get detailed information about a specific listing."
           },
@@ -979,16 +854,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}/reviews?page=1&limit=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings",
-                "{{listingId}}",
-                "reviews"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings", "{{listingId}}", "reviews"],
               "query": [
                 {
                   "key": "page",
@@ -1060,14 +927,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings"]
             },
             "description": "Create a new product listing."
           },
@@ -1113,15 +974,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings",
-                "{{listingId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings", "{{listingId}}"]
             },
             "description": "Update existing listing price, description, condition, or status."
           },
@@ -1158,15 +1012,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings",
-                "{{listingId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings", "{{listingId}}"]
             },
             "description": "Delete listing by ID."
           },
@@ -1235,16 +1082,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}/images",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings",
-                "{{listingId}}",
-                "images"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings", "{{listingId}}", "images"]
             },
             "description": "Upload an image directly from your device using multipart/form-data. The backend streams the file to Neon Object Storage and saves the record in PostgreSQL."
           },
@@ -1307,15 +1146,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/listing-images/presign",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listing-images",
-                "presign"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listing-images", "presign"]
             },
             "description": "Request a short-lived presigned PUT URL and server-generated object key to directly upload image bytes to Neon Object Storage from Flutter or frontend."
           },
@@ -1377,15 +1209,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/listing-images/complete",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listing-images",
-                "complete"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listing-images", "complete"]
             },
             "description": "Verifies the uploaded object in Neon Object Storage, validates actual magic bytes and content length, and persists durable metadata in PostgreSQL."
           },
@@ -1412,9 +1237,7 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listing-images/listing/{{listingId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
+              "host": ["{{baseUrl}}"],
               "path": [
                 "api",
                 "v1",
@@ -1448,16 +1271,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listing-images/{{imageId}}/url",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listing-images",
-                "{{imageId}}",
-                "url"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listing-images", "{{imageId}}", "url"]
             },
             "description": "Generate a fresh presigned GET URL for a private listing image."
           },
@@ -1494,15 +1309,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listing-images/{{imageId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listing-images",
-                "{{imageId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listing-images", "{{imageId}}"]
             },
             "description": "Safely delete an image from Neon Object Storage and PostgreSQL. Verifies seller ownership or administrator role."
           },
@@ -1529,16 +1337,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}/images",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "listings",
-                "{{listingId}}",
-                "images"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "listings", "{{listingId}}", "images"]
             },
             "description": "Legacy route to retrieve all images associated with a listing."
           },
@@ -1575,9 +1375,7 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}/images/{{imageId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
+              "host": ["{{baseUrl}}"],
               "path": [
                 "api",
                 "v1",
@@ -1652,14 +1450,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/search-history",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "search-history"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "search-history"]
             },
             "description": "Record a search performed by the user."
           },
@@ -1696,14 +1488,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/search-history",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "search-history"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "search-history"]
             },
             "description": "Retrieve search history of the logged in user."
           },
@@ -1740,15 +1526,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/search-history/{{searchHistoryId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "search-history",
-                "{{searchHistoryId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "search-history", "{{searchHistoryId}}"]
             },
             "description": "Delete an individual search history entry."
           },
@@ -1785,14 +1564,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/search-history",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "search-history"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "search-history"]
             },
             "description": "Clear entire search history of the authenticated user."
           },
@@ -1824,15 +1597,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/payment/methods",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "payment",
-                "methods"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payment", "methods"]
             },
             "description": "Get available payment methods."
           },
@@ -1894,15 +1660,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/payment/initiate",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "payment",
-                "initiate"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payment", "initiate"]
             },
             "description": "Initiate Cash on Delivery payment for a listing."
           },
@@ -1948,15 +1707,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/payment/initiate",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "payment",
-                "initiate"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payment", "initiate"]
             },
             "description": "Test online payment endpoint response (returns 501 Not Implemented)."
           },
@@ -1993,16 +1745,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/payment/{{paymentId}}/status",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "payment",
-                "{{paymentId}}",
-                "status"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "payment", "{{paymentId}}", "status"]
             },
             "description": "Check status of a payment by paymentId."
           },
@@ -2044,14 +1788,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/transactions?type=all&page=1&limit=20",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "transactions"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "transactions"],
               "query": [
                 {
                   "key": "type",
@@ -2103,15 +1841,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/transactions/{{transactionId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "transactions",
-                "{{transactionId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "transactions", "{{transactionId}}"]
             },
             "description": "Get detailed information about a specific transaction."
           },
@@ -2178,14 +1909,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/refunds",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "refunds"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "refunds"]
             },
             "description": "Create a new refund request for a completed payment."
           },
@@ -2222,14 +1947,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/refunds",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "refunds"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "refunds"]
             },
             "description": "List all refund requests created by the user."
           },
@@ -2266,15 +1985,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/refunds/{{refundId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "refunds",
-                "{{refundId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "refunds", "{{refundId}}"]
             },
             "description": "Get detailed information about a refund request."
           },
@@ -2311,16 +2023,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/refunds/{{refundId}}/process",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "refunds",
-                "{{refundId}}",
-                "process"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "refunds", "{{refundId}}", "process"]
             },
             "description": "Move refund into 'processing' state."
           },
@@ -2387,14 +2091,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reviews"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reviews"]
             },
             "description": "Submit a review and rating (1-5) for a listing."
           },
@@ -2421,15 +2119,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reviews",
-                "{{reviewId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reviews", "{{reviewId}}"]
             },
             "description": "Get review details by review ID."
           },
@@ -2475,15 +2166,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reviews",
-                "{{reviewId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reviews", "{{reviewId}}"]
             },
             "description": "Update own review rating or comment."
           },
@@ -2520,15 +2204,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reviews",
-                "{{reviewId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reviews", "{{reviewId}}"]
             },
             "description": "Delete user's own review."
           },
@@ -2595,14 +2272,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/messages",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "messages"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages"]
             },
             "description": "Send direct message to another user."
           },
@@ -2639,15 +2310,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/messages/conversations",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "messages",
-                "conversations"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "conversations"]
             },
             "description": "List conversations and recent chats for authenticated user."
           },
@@ -2684,9 +2348,7 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/messages/conversation/{{chatUserId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
+              "host": ["{{baseUrl}}"],
               "path": [
                 "api",
                 "v1",
@@ -2730,16 +2392,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/messages/{{messageId}}/read",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "messages",
-                "{{messageId}}",
-                "read"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "{{messageId}}", "read"]
             },
             "description": "Mark a received message as read."
           },
@@ -2776,15 +2430,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/messages/{{messageId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "messages",
-                "{{messageId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "messages", "{{messageId}}"]
             },
             "description": "Delete a sent message."
           },
@@ -2826,15 +2473,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/users?page=1&limit=10&role=user&search=",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "users"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users"],
               "query": [
                 {
                   "key": "page",
@@ -2891,16 +2531,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users", "{{userId}}"]
             },
             "description": "Admin get user profile by ID."
           },
@@ -2946,16 +2578,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users", "{{userId}}"]
             },
             "description": "Admin edit user role (user/admin), name, or email."
           },
@@ -2992,16 +2616,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "users",
-                "{{userId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "users", "{{userId}}"]
             },
             "description": "Admin delete user account (cannot delete own admin account)."
           },
@@ -3038,15 +2654,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/refunds?page=1&limit=10&status=requested",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "refunds"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "refunds"],
               "query": [
                 {
                   "key": "page",
@@ -3103,16 +2712,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/refunds/{{refundId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "refunds",
-                "{{refundId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "refunds", "{{refundId}}"]
             },
             "description": "Admin view specific refund details."
           },
@@ -3158,15 +2759,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/refunds",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "refunds"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "refunds"]
             },
             "description": "Admin manually issue a refund for a payment."
           },
@@ -3212,16 +2806,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/admin/refunds/{{refundId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "admin",
-                "refunds",
-                "{{refundId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "refunds", "{{refundId}}"]
             },
             "description": "Admin change refund status (e.g. to completed, rejected, processing, failed)."
           },

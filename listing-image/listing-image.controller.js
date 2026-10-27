@@ -39,7 +39,7 @@ const deleteLocalFile = async (imageUrl) => {
     process.cwd(),
     "uploads",
     "listing-images",
-    filename
+    filename,
   );
 
   try {
@@ -196,8 +196,7 @@ export const completeListingImageUpload = async (req, res, next) => {
     }
 
     const existingCount = await countListingImages(listing_id);
-    const finalIsPrimary =
-      existingCount === 0 ? true : Boolean(is_primary);
+    const finalIsPrimary = existingCount === 0 ? true : Boolean(is_primary);
 
     const imageRecord = await createListingImage({
       listingId: listing_id,
@@ -221,7 +220,6 @@ export const completeListingImageUpload = async (req, res, next) => {
       },
     });
   } catch (error) {
-
     if (createdObjectKey) {
       await deleteStorageObject(createdObjectKey).catch(() => {});
     }
@@ -271,7 +269,7 @@ export const retrieveListingImages = async (req, res, next) => {
           access_url: accessUrl,
           image_url: accessUrl,
         };
-      })
+      }),
     );
 
     return res.status(200).json({
@@ -300,7 +298,7 @@ export const removeListingImage = async (req, res, next) => {
 
     const existingImage = await getListingImageById(
       imageId,
-      listingIdParam ?? null
+      listingIdParam ?? null,
     );
 
     if (!existingImage) {
@@ -338,7 +336,7 @@ export const removeListingImage = async (req, res, next) => {
 
     const deletedImage = await deleteListingImage(
       existingImage.image_id,
-      existingImage.listing_id
+      existingImage.listing_id,
     );
 
     return res.status(200).json({
@@ -431,7 +429,8 @@ export const uploadListingImage = async (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Please select an image file to upload under field name 'image'.",
+        message:
+          "Please select an image file to upload under field name 'image'.",
       });
     }
 

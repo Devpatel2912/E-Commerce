@@ -36,9 +36,11 @@ export const assertDatabaseMigrated = async () => {
 
     if (tableCheck.length === 0) {
       logger.error(
-        "[FATAL] Database migrations have NOT been executed! The 'schema_migrations' table does not exist."
+        "[FATAL] Database migrations have NOT been executed! The 'schema_migrations' table does not exist.",
       );
-      logger.error("[FATAL] Run 'npm run migrate' to create all database tables before starting the project.");
+      logger.error(
+        "[FATAL] Run 'npm run migrate' to create all database tables before starting the project.",
+      );
       process.exit(1);
     }
 
@@ -46,7 +48,7 @@ export const assertDatabaseMigrated = async () => {
     const sqlFiles = files.filter((file) => file.endsWith(".sql"));
 
     const { rows: appliedRows } = await client.query(
-      "SELECT filename FROM schema_migrations;"
+      "SELECT filename FROM schema_migrations;",
     );
     const appliedSet = new Set(appliedRows.map((r) => r.filename));
 
@@ -54,9 +56,11 @@ export const assertDatabaseMigrated = async () => {
 
     if (pendingMigrations.length > 0) {
       logger.error(
-        `[FATAL] Database is missing migrations! Pending migration(s): ${pendingMigrations.join(", ")}`
+        `[FATAL] Database is missing migrations! Pending migration(s): ${pendingMigrations.join(", ")}`,
       );
-      logger.error("[FATAL] Run 'npm run migrate' to apply pending migrations before starting the project.");
+      logger.error(
+        "[FATAL] Run 'npm run migrate' to apply pending migrations before starting the project.",
+      );
       process.exit(1);
     }
 
@@ -66,18 +70,26 @@ export const assertDatabaseMigrated = async () => {
       WHERE table_schema = 'public';
     `);
 
-    const existingTablesSet = new Set(existingTablesRows.map((r) => r.table_name));
-    const missingTables = REQUIRED_TABLES.filter((t) => !existingTablesSet.has(t));
+    const existingTablesSet = new Set(
+      existingTablesRows.map((r) => r.table_name),
+    );
+    const missingTables = REQUIRED_TABLES.filter(
+      (t) => !existingTablesSet.has(t),
+    );
 
     if (missingTables.length > 0) {
       logger.error(
-        `[FATAL] Missing required database table(s): ${missingTables.join(", ")}`
+        `[FATAL] Missing required database table(s): ${missingTables.join(", ")}`,
       );
-      logger.error("[FATAL] Run 'npm run migrate' to initialize the database schema before starting the project.");
+      logger.error(
+        "[FATAL] Run 'npm run migrate' to initialize the database schema before starting the project.",
+      );
       process.exit(1);
     }
 
-    logger.info("Database schema preflight check passed: all tables and migrations are up to date.");
+    logger.info(
+      "Database schema preflight check passed: all tables and migrations are up to date.",
+    );
   } catch (error) {
     logger.error("Failed to verify database migration status:", error);
     process.exit(1);

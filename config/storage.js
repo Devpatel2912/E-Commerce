@@ -186,7 +186,8 @@ export const verifyStorageObjectContent = async (objectKey) => {
     const detectedMime = detectImageMimeFromBytes(buffer);
 
     return {
-      isValid: detectedMime !== null && ALLOWED_IMAGE_MIME_TYPES.has(detectedMime),
+      isValid:
+        detectedMime !== null && ALLOWED_IMAGE_MIME_TYPES.has(detectedMime),
       detectedMime,
     };
   } catch (error) {

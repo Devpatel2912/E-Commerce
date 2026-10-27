@@ -40,15 +40,13 @@ const createAccessToken = (user) =>
   jwt.sign(
     { sub: String(user.id), email: user.email, role: user.role || "user" },
     ACCESS_SECRET,
-    { expiresIn: ACCESS_EXPIRES_IN }
+    { expiresIn: ACCESS_EXPIRES_IN },
   );
 
 const createRefreshToken = (user) =>
-  jwt.sign(
-    { sub: String(user.id), jti: crypto.randomUUID() },
-    REFRESH_SECRET,
-    { expiresIn: REFRESH_EXPIRES_IN }
-  );
+  jwt.sign({ sub: String(user.id), jti: crypto.randomUUID() }, REFRESH_SECRET, {
+    expiresIn: REFRESH_EXPIRES_IN,
+  });
 
 const getRefreshExpiry = (token) => {
   const decoded = jwt.decode(token);
@@ -72,10 +70,7 @@ const issueTokens = async (user, res) => {
 
   res.cookie(REFRESH_COOKIE, refreshToken, {
     ...cookieOptions,
-    maxAge: Math.max(
-      0,
-      getRefreshExpiry(refreshToken).getTime() - Date.now()
-    ),
+    maxAge: Math.max(0, getRefreshExpiry(refreshToken).getTime() - Date.now()),
   });
 
   return accessToken;
@@ -111,7 +106,6 @@ export const register = async (req, res) => {
       passwordHash,
     });
   } catch (error) {
-
     if (error.code === "23505") {
       throw new ApiError(409, "Email is already registered.");
     }
@@ -125,7 +119,7 @@ export const register = async (req, res) => {
     new ApiResponse(201, "Registration successful.", {
       user: publicUser(user),
       accessToken,
-    })
+    }),
   );
 };
 
@@ -135,10 +129,7 @@ export const login = async (req, res) => {
 
   const user = await findUserByEmail(email);
 
-  if (
-    !user ||
-    !(await bcrypt.compare(password, user.password_hash))
-  ) {
+  if (!user || !(await bcrypt.compare(password, user.password_hash))) {
     throw new ApiError(401, "Invalid email or password.");
   }
 
@@ -148,7 +139,7 @@ export const login = async (req, res) => {
     new ApiResponse(200, "Login successful.", {
       user: publicUser(user),
       accessToken,
-    })
+    }),
   );
 };
 
@@ -162,7 +153,7 @@ export const getMe = async (req, res) => {
   return res.status(200).json(
     new ApiResponse(200, "Profile retrieved successfully.", {
       user: publicUser(user),
-    })
+    }),
   );
 };
 
@@ -182,11 +173,7 @@ export const refresh = async (req, res) => {
     throw new ApiError(401, "Invalid or expired refresh token.");
   }
 
-  if (
-    typeof decoded === "string" ||
-    !decoded.sub ||
-    !decoded.jti
-  ) {
+  if (typeof decoded === "string" || !decoded.sub || !decoded.jti) {
     res.clearCookie(REFRESH_COOKIE, cookieOptions);
     throw new ApiError(401, "Invalid refresh token.");
   }
@@ -210,7 +197,7 @@ export const refresh = async (req, res) => {
   return res.status(200).json(
     new ApiResponse(200, "Tokens refreshed successfully.", {
       accessToken,
-    })
+    }),
   );
 };
 
@@ -218,13 +205,10 @@ export const logout = async (req, res) => {
   const refreshToken = req.cookies?.[REFRESH_COOKIE];
 
   if (refreshToken) {
-
     await revokeRefreshToken(hashToken(refreshToken));
   }
 
   res.clearCookie(REFRESH_COOKIE, cookieOptions);
 
-  return res.status(200).json(
-    new ApiResponse(200, "Logout successful.")
-  );
+  return res.status(200).json(new ApiResponse(200, "Logout successful."));
 };

@@ -19,7 +19,9 @@ const isValidId = (value) => {
   }
   return (
     typeof value === "string" &&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    )
   );
 };
 
@@ -36,11 +38,7 @@ const sendError = (res, status, message) =>
 
 const handleDatabaseError = (error, res) => {
   if (error.code === "23505") {
-    return sendError(
-      res,
-      409,
-      "You have already reviewed this listing.",
-    );
+    return sendError(res, 409, "You have already reviewed this listing.");
   }
 
   if (error.code === "23503") {
@@ -229,11 +227,7 @@ export const updateReview = async (req, res) => {
     }
 
     if (existingReview.user_id !== userId) {
-      return sendError(
-        res,
-        403,
-        "You can only update your own reviews.",
-      );
+      return sendError(res, 403, "You can only update your own reviews.");
     }
 
     const review = await updateReviewModel({
@@ -277,11 +271,7 @@ export const deleteReview = async (req, res) => {
     }
 
     if (existingReview.user_id !== userId) {
-      return sendError(
-        res,
-        403,
-        "You can only delete your own reviews.",
-      );
+      return sendError(res, 403, "You can only delete your own reviews.");
     }
 
     await deleteReviewModel(reviewId, userId);

@@ -44,30 +44,25 @@ router.post(
   authMiddleware,
   validateListingId,
   upload.single("image"),
-  uploadListingImage
+  uploadListingImage,
 );
-router.delete("/:id/images/:imageId", authMiddleware, validateListingId, removeListingImage);
-
-router.post(
-  "/",
+router.delete(
+  "/:id/images/:imageId",
   authMiddleware,
-  validateCreateListing,
-  createListing
+  validateListingId,
+  removeListingImage,
 );
+
+router.post("/", authMiddleware, validateCreateListing, createListing);
 
 router.patch(
   "/:id",
   authMiddleware,
   validateListingId,
   validateUpdateListing,
-  updateListing
+  updateListing,
 );
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  validateListingId,
-  deleteListing
-);
+router.delete("/:id", authMiddleware, validateListingId, deleteListing);
 
 export default router;

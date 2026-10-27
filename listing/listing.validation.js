@@ -6,21 +6,12 @@ export const validateCreateListing = (req, res, next) => {
     req.body = {};
   }
 
-  const {
-    category_id,
-    title,
-    description,
-    price,
-    condition,
-    location,
-  } = req.body;
+  const { category_id, title, description, price, condition, location } =
+    req.body;
 
   const errors = [];
 
-  if (
-    !Number.isSafeInteger(Number(category_id)) ||
-    Number(category_id) <= 0
-  ) {
+  if (!Number.isSafeInteger(Number(category_id)) || Number(category_id) <= 0) {
     errors.push("category_id must be a positive integer.");
   }
 
@@ -101,9 +92,7 @@ export const validateUpdateListing = (req, res, next) => {
     });
   }
 
-  const unknownFields = keys.filter(
-    (key) => !allowedFields.includes(key)
-  );
+  const unknownFields = keys.filter((key) => !allowedFields.includes(key));
 
   if (unknownFields.length) {
     return res.status(400).json({
@@ -127,8 +116,7 @@ export const validateUpdateListing = (req, res, next) => {
 
   if (
     category_id !== undefined &&
-    (!Number.isSafeInteger(Number(category_id)) ||
-      Number(category_id) <= 0)
+    (!Number.isSafeInteger(Number(category_id)) || Number(category_id) <= 0)
   ) {
     errors.push("category_id must be a positive integer.");
   }
@@ -165,10 +153,7 @@ export const validateUpdateListing = (req, res, next) => {
     }
   }
 
-  if (
-    condition !== undefined &&
-    !validConditions.includes(condition)
-  ) {
+  if (condition !== undefined && !validConditions.includes(condition)) {
     errors.push("condition must be 'new' or 'used'.");
   }
 

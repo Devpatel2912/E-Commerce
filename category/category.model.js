@@ -7,10 +7,7 @@ const createCategory = async ({ name, description }) => {
     RETURNING id, name, description, created_at, updated_at
   `;
 
-  const { rows } = await pool.query(query, [
-    name.trim(),
-    description ?? null,
-  ]);
+  const { rows } = await pool.query(query, [name.trim(), description ?? null]);
 
   return rows[0];
 };
@@ -30,7 +27,7 @@ const getCategoryById = async (id) => {
     `SELECT id, name, description, created_at, updated_at
      FROM categories
      WHERE id = $1`,
-    [id]
+    [id],
   );
 
   return rows[0] ?? null;
@@ -59,7 +56,7 @@ const updateCategory = async (id, fields) => {
      SET ${updates.join(", ")}
      WHERE id = $${index}
      RETURNING id, name, description, created_at, updated_at`,
-    values
+    values,
   );
 
   return rows[0] ?? null;
@@ -70,7 +67,7 @@ const deleteCategory = async (id) => {
     `DELETE FROM categories
      WHERE id = $1
      RETURNING id, name, description`,
-    [id]
+    [id],
   );
 
   return rows[0] ?? null;

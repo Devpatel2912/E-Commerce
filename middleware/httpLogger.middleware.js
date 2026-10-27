@@ -68,8 +68,7 @@ const pinoHttpMiddleware = pinoHttp({
     `${req.method} ${req.url} ${res.statusCode}`,
   customErrorMessage: (req, res, err) =>
     `${req.method} ${req.url} ${res.statusCode} - ${err.message}`,
-  customReceivedMessage: (req, res) =>
-    `Incoming ${req.method} ${req.url}`,
+  customReceivedMessage: (req, res) => `Incoming ${req.method} ${req.url}`,
   customProps: (req, res) => ({
     params:
       req.params && Object.keys(req.params).length > 0 ? req.params : undefined,
@@ -95,7 +94,7 @@ export const httpLogger = (req, res, next) => {
       data = null,
       message = "Operation successful.",
       statusCode = 200,
-      meta = {}
+      meta = {},
     ) => {
       const envelope = createResponseEnvelope({
         statusCode,

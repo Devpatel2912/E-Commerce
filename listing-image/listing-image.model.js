@@ -16,7 +16,7 @@ export const createListingImage = async ({
     if (isPrimary) {
       await client.query(
         `UPDATE listing_images SET is_primary = FALSE WHERE listing_id = $1`,
-        [listingId]
+        [listingId],
       );
     }
 
@@ -59,12 +59,10 @@ export const getListingImages = async (listingId) => {
 };
 
 export const getListingImageById = async (imageId, listingId = null) => {
-
   let resolvedImageId = imageId;
   let resolvedListingId = listingId;
 
   if (listingId !== null && Number(imageId) > 0 && Number(listingId) > 0) {
-
     const query = `
       SELECT image_id, listing_id, object_key, content_type, file_size, image_url, is_primary, created_at
       FROM listing_images
@@ -145,7 +143,8 @@ export const deleteListingImage = async (imageId, listingId = null) => {
     const deletedImage = rows[0];
 
     if (existing.is_primary) {
-      await client.query(`
+      await client.query(
+        `
         UPDATE listing_images
         SET is_primary = TRUE
         WHERE image_id = (
@@ -154,7 +153,9 @@ export const deleteListingImage = async (imageId, listingId = null) => {
           ORDER BY created_at ASC
           LIMIT 1
         )
-      `, [existing.listing_id]);
+      `,
+        [existing.listing_id],
+      );
     }
 
     await client.query("COMMIT");

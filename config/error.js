@@ -106,7 +106,7 @@ export const extractFieldFromMessage = (msg) => {
   if (
     match &&
     !["a", "an", "the", "invalid", "missing", "please", "failed"].includes(
-      match[1].toLowerCase()
+      match[1].toLowerCase(),
     )
   ) {
     return match[1].toLowerCase();
@@ -205,11 +205,18 @@ export class AppError extends Error {
     Error.captureStackTrace?.(this, this.constructor);
   }
 
-  static badRequest(message = "Bad request", errorCode = ErrorCodes.BAD_REQUEST, errors = []) {
+  static badRequest(
+    message = "Bad request",
+    errorCode = ErrorCodes.BAD_REQUEST,
+    errors = [],
+  ) {
     return new AppError(400, message, { errorCode, errors });
   }
 
-  static unauthorized(message = "Unauthorized", errorCode = ErrorCodes.UNAUTHORIZED) {
+  static unauthorized(
+    message = "Unauthorized",
+    errorCode = ErrorCodes.UNAUTHORIZED,
+  ) {
     return new AppError(401, message, { errorCode });
   }
 
@@ -217,11 +224,17 @@ export class AppError extends Error {
     return new AppError(403, message, { errorCode });
   }
 
-  static notFound(message = "Resource not found", errorCode = ErrorCodes.NOT_FOUND) {
+  static notFound(
+    message = "Resource not found",
+    errorCode = ErrorCodes.NOT_FOUND,
+  ) {
     return new AppError(404, message, { errorCode });
   }
 
-  static conflict(message = "Conflict occurred", errorCode = ErrorCodes.CONFLICT) {
+  static conflict(
+    message = "Conflict occurred",
+    errorCode = ErrorCodes.CONFLICT,
+  ) {
     return new AppError(409, message, { errorCode });
   }
 
@@ -232,7 +245,10 @@ export class AppError extends Error {
     });
   }
 
-  static internal(message = "Internal server error", errorCode = ErrorCodes.INTERNAL_SERVER_ERROR) {
+  static internal(
+    message = "Internal server error",
+    errorCode = ErrorCodes.INTERNAL_SERVER_ERROR,
+  ) {
     return new AppError(500, message, { errorCode, isOperational: false });
   }
 }
@@ -240,7 +256,12 @@ export class AppError extends Error {
 export const ApiError = AppError;
 
 export class ApiResponse {
-  constructor(statusCode = 200, message = "Operation successful.", data = null, meta = {}) {
+  constructor(
+    statusCode = 200,
+    message = "Operation successful.",
+    data = null,
+    meta = {},
+  ) {
     this.success = Number(statusCode) < 400;
     this.statusCode = Number(statusCode);
     this.message = message;

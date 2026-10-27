@@ -19,7 +19,9 @@ function isValidId(value) {
   }
   return (
     typeof value === "string" &&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value,
+    )
   );
 }
 
@@ -101,10 +103,7 @@ export async function getRefundDetails(req, res, next) {
       });
     }
 
-    const refund = await getRefundById(
-      req.params.id,
-      getUserId(req)
-    );
+    const refund = await getRefundById(req.params.id, getUserId(req));
 
     if (!refund) {
       return res.status(404).json({
@@ -131,10 +130,7 @@ export async function processRefund(req, res, next) {
       });
     }
 
-    const refund = await startRefundProcessing(
-      req.params.id,
-      getUserId(req)
-    );
+    const refund = await startRefundProcessing(req.params.id, getUserId(req));
 
     return res.status(200).json({
       success: true,

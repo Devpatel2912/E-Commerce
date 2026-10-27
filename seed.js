@@ -24,4 +24,3 @@ const runSeed = async () => {
 };
 
 runSeed();
-

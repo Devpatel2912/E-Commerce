@@ -36,7 +36,7 @@ router.patch(
   "/refunds/:id",
   validateAdminIdParam,
   validateUpdateRefundStatus,
-  updateRefundStatus
+  updateRefundStatus,
 );
 
 export default router;

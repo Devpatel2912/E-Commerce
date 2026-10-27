@@ -63,7 +63,7 @@ export const editUser = async (req, res, next) => {
   try {
     const updatedUser = await updateAdminUser(
       req.validatedId,
-      req.validatedUserUpdate
+      req.validatedUserUpdate,
     );
 
     if (!updatedUser) {
@@ -77,7 +77,12 @@ export const editUser = async (req, res, next) => {
     });
   } catch (error) {
     if (error.code === "23505") {
-      return next(new ApiError(409, "Email address is already in use by another account."));
+      return next(
+        new ApiError(
+          409,
+          "Email address is already in use by another account.",
+        ),
+      );
     }
     next(error);
   }
@@ -86,7 +91,9 @@ export const editUser = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   try {
     if (String(req.user?.id) === String(req.validatedId)) {
-      return next(new ApiError(400, "You cannot delete your own admin account."));
+      return next(
+        new ApiError(400, "You cannot delete your own admin account."),
+      );
     }
 
     const deletedUser = await deleteAdminUser(req.validatedId);
@@ -105,8 +112,8 @@ export const deleteUser = async (req, res, next) => {
       return next(
         new ApiError(
           409,
-          "This account has dependent database records that prevent direct deletion."
-        )
+          "This account has dependent database records that prevent direct deletion.",
+        ),
       );
     }
     next(error);
@@ -180,7 +187,7 @@ export const updateRefundStatus = async (req, res, next) => {
   try {
     const updatedRefund = await updateAdminRefundStatus(
       req.validatedId,
-      req.validatedStatusUpdate
+      req.validatedStatusUpdate,
     );
 
     return res.status(200).json({

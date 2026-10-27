@@ -15,7 +15,7 @@ export const requireAdmin = async (req, res, next) => {
 
     const result = await pool.query(
       `SELECT role FROM users WHERE id = $1 LIMIT 1`,
-      [userId]
+      [userId],
     );
 
     if (result.rowCount === 0) {
@@ -26,7 +26,7 @@ export const requireAdmin = async (req, res, next) => {
 
     if (currentRole !== "admin") {
       return next(
-        new ApiError(403, "Access denied. Administrator privileges required.")
+        new ApiError(403, "Access denied. Administrator privileges required."),
       );
     }
 

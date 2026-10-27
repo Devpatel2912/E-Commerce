@@ -5,7 +5,7 @@ export const validateUpdateUser = (req, res, next) => {
   const allowedFields = ["name", "email"];
 
   const unknownFields = Object.keys(req.body ?? {}).filter(
-    (key) => !allowedFields.includes(key)
+    (key) => !allowedFields.includes(key),
   );
 
   if (unknownFields.length > 0) {
@@ -57,10 +57,7 @@ export const validateUpdateUser = (req, res, next) => {
 };
 
 export const validateUserId = (req, res, next) => {
-  if (
-    typeof req.params.id !== "string" ||
-    req.params.id.trim() === ""
-  ) {
+  if (typeof req.params.id !== "string" || req.params.id.trim() === "") {
     return res.status(400).json({
       success: false,
       message: "A valid user ID is required.",

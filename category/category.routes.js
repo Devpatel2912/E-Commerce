@@ -28,14 +28,9 @@ router.patch(
   authMiddleware,
   validateCategoryId,
   validateCategoryUpdate,
-  updateCategory
+  updateCategory,
 );
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  validateCategoryId,
-  deleteCategory
-);
+router.delete("/:id", authMiddleware, validateCategoryId, deleteCategory);
 
 export default router;

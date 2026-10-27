@@ -1,4 +1,3 @@
-
 import rateLimit from "express-rate-limit";
 import ApiError from "../utils/ApiError.js";
 
@@ -11,8 +10,8 @@ const rateLimitErrorHandler = (req, res, next, options) => {
       typeof options.message === "string"
         ? options.message
         : "Too many requests, please try again later.",
-      { errorCode: ErrorCodes.RATE_LIMIT_EXCEEDED }
-    )
+      { errorCode: ErrorCodes.RATE_LIMIT_EXCEEDED },
+    ),
   );
 };
 
@@ -42,5 +41,6 @@ export const globalLimiter = createRateLimiter({
 export const authLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 10,
-  message: "Too many authentication attempts from this IP, please try again after 15 minutes.",
+  message:
+    "Too many authentication attempts from this IP, please try again after 15 minutes.",
 });

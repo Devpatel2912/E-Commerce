@@ -55,13 +55,14 @@ app.get("/api/v1/health", (_req, res) => {
 
 app.use("/api/v1", globalLimiter, apiRoutes);
 
-app.use(
-  "/uploads",
-  express.static(path.resolve(process.cwd(), "uploads"))
-);
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
 app.use((req, res, next) => {
-  next(new ApiError(404, "API route not found.", { errorCode: ErrorCodes.ROUTE_NOT_FOUND }));
+  next(
+    new ApiError(404, "API route not found.", {
+      errorCode: ErrorCodes.ROUTE_NOT_FOUND,
+    }),
+  );
 });
 
 app.use(errorMiddleware);

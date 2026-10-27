@@ -22,7 +22,7 @@ const errorMiddleware = (err, req, res, next) => {
 
   const isClientError = statusCode >= 400 && statusCode < 500;
   const isOperational = Boolean(
-    err.isOperational || err instanceof AppError || isClientError
+    err.isOperational || err instanceof AppError || isClientError,
   );
   const requestId = req?.requestId || req?.id || null;
 
@@ -51,7 +51,9 @@ const errorMiddleware = (err, req, res, next) => {
       errorCode = getDefaultErrorCode(statusCode);
     }
     if (!message) {
-      message = isOperational ? "Client error occurred." : "Internal server error.";
+      message = isOperational
+        ? "Client error occurred."
+        : "Internal server error.";
     }
   }
 
@@ -70,7 +72,7 @@ const errorMiddleware = (err, req, res, next) => {
           code: err.code,
         },
       },
-      `Unhandled server error [${statusCode}] [${errorCode}]: ${message}`
+      `Unhandled server error [${statusCode}] [${errorCode}]: ${message}`,
     );
   } else {
     logger.warn(
@@ -82,7 +84,7 @@ const errorMiddleware = (err, req, res, next) => {
         message,
         details: details || errors,
       },
-      `Operational client warning [${statusCode}] [${errorCode}]: ${message}`
+      `Operational client warning [${statusCode}] [${errorCode}]: ${message}`,
     );
   }
 

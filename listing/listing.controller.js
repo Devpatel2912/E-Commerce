@@ -8,7 +8,6 @@ import {
 
 export const createListing = async (req, res, next) => {
   try {
-
     const user_id = req.user?.user_id ?? req.user?.id;
 
     if (!user_id) {
@@ -94,11 +93,7 @@ export const updateListing = async (req, res, next) => {
       });
     }
 
-    const listing = await editListing(
-      req.params.id,
-      user_id,
-      req.body
-    );
+    const listing = await editListing(req.params.id, user_id, req.body);
 
     return res.status(200).json({
       success: true,

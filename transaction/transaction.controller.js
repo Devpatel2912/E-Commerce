@@ -66,10 +66,7 @@ export const getTransactionDetails = async (req, res, next) => {
   try {
     const transactionId = Number(req.params.id);
 
-    if (
-      !Number.isSafeInteger(transactionId) ||
-      transactionId < 1
-    ) {
+    if (!Number.isSafeInteger(transactionId) || transactionId < 1) {
       return res.status(400).json({
         success: false,
         message: "Transaction ID must be a positive integer.",

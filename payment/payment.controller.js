@@ -18,10 +18,7 @@ export async function initiatePayment(req, res, next) {
   try {
     const { listing_id, payment_method } = req.body;
 
-    if (
-      !Number.isSafeInteger(listing_id) ||
-      listing_id <= 0
-    ) {
+    if (!Number.isSafeInteger(listing_id) || listing_id <= 0) {
       return res.status(400).json({
         success: false,
         message: "listing_id must be a positive integer.",
@@ -72,10 +69,7 @@ export async function initiatePayment(req, res, next) {
       });
     }
 
-    if (
-      listing.status &&
-      listing.status.toLowerCase() !== "active"
-    ) {
+    if (listing.status && listing.status.toLowerCase() !== "active") {
       return res.status(409).json({
         success: false,
         message: "This listing is not available for purchase.",
@@ -111,8 +105,7 @@ export async function initiatePayment(req, res, next) {
       data: {
         payment,
         payment_method: "cash",
-        instructions:
-          "Pay the seller when the item is delivered or exchanged.",
+        instructions: "Pay the seller when the item is delivered or exchanged.",
       },
     });
   } catch (error) {

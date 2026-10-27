@@ -6,9 +6,7 @@ const authMiddleware = (req, res, next) => {
   const authorization = req.headers.authorization;
 
   if (!authorization?.startsWith("Bearer ")) {
-    return next(
-      new ApiError(401, "Access token is required.")
-    );
+    return next(new ApiError(401, "Access token is required."));
   }
 
   const token = authorization.slice(7).trim();
@@ -18,16 +16,9 @@ const authMiddleware = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      config.jwt.accessSecret
-    );
+    const decoded = jwt.verify(token, config.jwt.accessSecret);
 
-    if (
-      typeof decoded === "string" ||
-      !decoded.sub ||
-      !decoded.email
-    ) {
+    if (typeof decoded === "string" || !decoded.sub || !decoded.email) {
       throw new Error("Invalid token payload.");
     }
 

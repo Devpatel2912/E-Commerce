@@ -48,9 +48,7 @@ const validateCategoryUpdate = (req, res, next) => {
 
   if (
     name !== undefined &&
-    (typeof name !== "string" ||
-      !name.trim() ||
-      name.trim().length > 100)
+    (typeof name !== "string" || !name.trim() || name.trim().length > 100)
   ) {
     return res.status(400).json({
       success: false,
@@ -92,8 +90,4 @@ const validateCategoryId = (req, res, next) => {
   next();
 };
 
-export {
-  validateCategory,
-  validateCategoryUpdate,
-  validateCategoryId,
-};
+export { validateCategory, validateCategoryUpdate, validateCategoryId };

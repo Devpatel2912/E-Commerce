@@ -1,30 +1,34 @@
-import { findUserById,updateUser,deleteUser,findUsers } from "./user.model.js";
+import {
+  findUserById,
+  updateUser,
+  deleteUser,
+  findUsers,
+} from "./user.model.js";
 import logger from "../config/logger.js";
 
-export const getUsers = async (req,res) => {
+export const getUsers = async (req, res) => {
+  try {
+    const { page, limit, offset } = req.pagination;
+    const users = await findUsers(limit, offset);
 
-    try{
-        const {page,limit,offset} = req.pagination;
-        const users = await findUsers(limit,offset);
+    return res.status(200).json({
+      success: true,
+      message: "Users retrieved successfully.",
+      pagination: {
+        page,
+        limit,
+        count: users.length,
+      },
+      data: users,
+    });
+  } catch (error) {
+    logger.error("Get users error:", error);
 
-        return res.status(200).json({
-            success:true,
-            message:"Users retrieved successfully.",
-            pagination:{
-                page,
-                limit,
-                count:users.length,
-            },
-            data:users,
-        });
-    }catch(error){
-        logger.error("Get users error:", error);
-
-        return res.status(500).json({
-            success:false,
-            message:"Failed to retrieved users",
-        })
-    }
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieved users",
+    });
+  }
 };
 
 export const getUserById = async (req, res) => {
@@ -102,7 +106,6 @@ export const removeUser = async (req, res) => {
       message: "User account deleted successfully.",
     });
   } catch (error) {
-
     if (error.code === "23503") {
       return res.status(409).json({
         success: false,

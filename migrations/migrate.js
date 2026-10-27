@@ -25,7 +25,7 @@ export const runMigrations = async () => {
     `);
 
     const { rows: appliedRows } = await client.query(
-      "SELECT filename FROM schema_migrations"
+      "SELECT filename FROM schema_migrations",
     );
     const appliedSet = new Set(appliedRows.map((r) => r.filename));
 
@@ -56,7 +56,7 @@ export const runMigrations = async () => {
         await client.query(sqlContent);
         await client.query(
           "INSERT INTO schema_migrations (filename) VALUES ($1)",
-          [sqlFile]
+          [sqlFile],
         );
         await client.query("COMMIT");
         appliedCount++;
@@ -71,7 +71,9 @@ export const runMigrations = async () => {
     if (appliedCount === 0) {
       logger.info("Database is already up to date. No new migrations applied.");
     } else {
-      logger.info(`Migration process completed. ${appliedCount} migration(s) applied successfully.`);
+      logger.info(
+        `Migration process completed. ${appliedCount} migration(s) applied successfully.`,
+      );
     }
   } finally {
     client.release();

@@ -92,13 +92,8 @@ export const getTransactionsByUser = async ({
   return rows;
 };
 
-export const countTransactionsByUser = async ({
-  userId,
-  type = "all",
-}) => {
-  const conditions = [
-    "(p.user_id = $1 OR l.user_id = $1)",
-  ];
+export const countTransactionsByUser = async ({ userId, type = "all" }) => {
+  const conditions = ["(p.user_id = $1 OR l.user_id = $1)"];
 
   const values = [userId];
 
@@ -120,10 +115,7 @@ export const countTransactionsByUser = async ({
   return rows[0].total;
 };
 
-export const getTransactionById = async ({
-  transactionId,
-  userId,
-}) => {
+export const getTransactionById = async ({ transactionId, userId }) => {
   const query = `
     SELECT
       t.id,
@@ -150,10 +142,7 @@ export const getTransactionById = async ({
     LIMIT 1
   `;
 
-  const { rows } = await pool.query(query, [
-    transactionId,
-    userId,
-  ]);
+  const { rows } = await pool.query(query, [transactionId, userId]);
 
   return rows[0] || null;
 };

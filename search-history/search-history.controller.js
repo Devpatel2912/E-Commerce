@@ -157,7 +157,7 @@ export const deleteSearchHistoryItem = async (req, res, next) => {
 
     const deletedRecord = await deleteSearchHistoryByIdAndUserId(
       searchId,
-      userId
+      userId,
     );
 
     if (!deletedRecord) {

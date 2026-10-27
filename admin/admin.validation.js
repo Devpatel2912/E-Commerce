@@ -10,7 +10,9 @@ export const validateAdminIdParam = (req, res, next) => {
   const id = parsePositiveInt(req.params.id);
 
   if (!id) {
-    return next(new ApiError(400, "Invalid ID parameter. Must be a positive integer."));
+    return next(
+      new ApiError(400, "Invalid ID parameter. Must be a positive integer."),
+    );
   }
 
   req.validatedId = id;
@@ -31,13 +33,22 @@ export const validateEditUser = (req, res, next) => {
 
   if (name === undefined && email === undefined && role === undefined) {
     return next(
-      new ApiError(400, "At least one field (name, email, or role) must be provided to update.")
+      new ApiError(
+        400,
+        "At least one field (name, email, or role) must be provided to update.",
+      ),
     );
   }
 
   if (name !== undefined) {
-    if (typeof name !== "string" || name.trim().length < 2 || name.trim().length > 100) {
-      return next(new ApiError(400, "Name must be between 2 and 100 characters."));
+    if (
+      typeof name !== "string" ||
+      name.trim().length < 2 ||
+      name.trim().length > 100
+    ) {
+      return next(
+        new ApiError(400, "Name must be between 2 and 100 characters."),
+      );
     }
   }
 
@@ -50,9 +61,15 @@ export const validateEditUser = (req, res, next) => {
 
   if (role !== undefined) {
     const allowedRoles = ["user", "admin"];
-    if (typeof role !== "string" || !allowedRoles.includes(role.trim().toLowerCase())) {
+    if (
+      typeof role !== "string" ||
+      !allowedRoles.includes(role.trim().toLowerCase())
+    ) {
       return next(
-        new ApiError(400, `Invalid role. Allowed values are: ${allowedRoles.join(", ")}`)
+        new ApiError(
+          400,
+          `Invalid role. Allowed values are: ${allowedRoles.join(", ")}`,
+        ),
       );
     }
   }
@@ -71,15 +88,22 @@ export const validateIssueRefund = (req, res, next) => {
 
   const paymentId = parsePositiveInt(payment_id);
   if (!paymentId) {
-    return next(new ApiError(400, "A valid positive integer payment_id is required."));
+    return next(
+      new ApiError(400, "A valid positive integer payment_id is required."),
+    );
   }
 
   const refundAmount = Number(amount);
   if (!Number.isFinite(refundAmount) || refundAmount <= 0) {
-    return next(new ApiError(400, "amount must be a positive number greater than 0."));
+    return next(
+      new ApiError(400, "amount must be a positive number greater than 0."),
+    );
   }
 
-  if (reason !== undefined && (typeof reason !== "string" || reason.trim().length > 1000)) {
+  if (
+    reason !== undefined &&
+    (typeof reason !== "string" || reason.trim().length > 1000)
+  ) {
     return next(new ApiError(400, "reason must not exceed 1000 characters."));
   }
 
@@ -95,13 +119,13 @@ export const validateIssueRefund = (req, res, next) => {
 
   if (
     status !== undefined &&
-    (!allowedStatuses.includes(String(status).toLowerCase()))
+    !allowedStatuses.includes(String(status).toLowerCase())
   ) {
     return next(
       new ApiError(
         400,
-        `Invalid status. Allowed values: ${allowedStatuses.join(", ")}`
-      )
+        `Invalid status. Allowed values: ${allowedStatuses.join(", ")}`,
+      ),
     );
   }
 
@@ -132,8 +156,8 @@ export const validateUpdateRefundStatus = (req, res, next) => {
     return next(
       new ApiError(
         400,
-        `Valid status is required. Allowed values: ${allowedStatuses.join(", ")}`
-      )
+        `Valid status is required. Allowed values: ${allowedStatuses.join(", ")}`,
+      ),
     );
   }
 

@@ -23,7 +23,7 @@ export async function createRefundRequest({
        FROM payments
        WHERE id = $1 AND user_id = $2
        FOR UPDATE`,
-      [paymentId, userId]
+      [paymentId, userId],
     );
 
     if (paymentResult.rowCount === 0) {
@@ -36,12 +36,10 @@ export async function createRefundRequest({
 
     if (
       !REFUNDABLE_PAYMENT_STATUSES.includes(
-        String(payment.status).toLowerCase()
+        String(payment.status).toLowerCase(),
       )
     ) {
-      const error = new Error(
-        "This payment is not eligible for a refund."
-      );
+      const error = new Error("This payment is not eligible for a refund.");
       error.statusCode = 409;
       throw error;
     }
@@ -53,17 +51,15 @@ export async function createRefundRequest({
          AND LOWER(status) IN (
            'requested', 'pending', 'processing', 'completed', 'succeeded'
          )`,
-      [paymentId]
+      [paymentId],
     );
 
-    const alreadyReserved = Number(
-      existingResult.rows[0].total_refunded
-    );
+    const alreadyReserved = Number(existingResult.rows[0].total_refunded);
     const paymentAmount = Number(payment.amount);
 
     if (amount + alreadyReserved > paymentAmount) {
       const error = new Error(
-        "The requested refund exceeds the remaining refundable amount."
+        "The requested refund exceeds the remaining refundable amount.",
       );
       error.statusCode = 409;
       throw error;
@@ -74,7 +70,7 @@ export async function createRefundRequest({
          (payment_id, amount, reason, status, provider_refund_id)
        VALUES ($1, $2, $3, 'requested', NULL)
        RETURNING *`,
-      [paymentId, amount, reason]
+      [paymentId, amount, reason],
     );
 
     await client.query("COMMIT");
@@ -94,7 +90,7 @@ export async function getRefundsByUser(userId) {
      INNER JOIN payments p ON p.id = r.payment_id
      WHERE p.user_id = $1
      ORDER BY r.created_at DESC`,
-    [userId]
+    [userId],
   );
 
   return result.rows;
@@ -106,7 +102,7 @@ export async function getRefundById(refundId, userId) {
      FROM refunds r
      INNER JOIN payments p ON p.id = r.payment_id
      WHERE r.id = $1 AND p.user_id = $2`,
-    [refundId, userId]
+    [refundId, userId],
   );
 
   return result.rows[0] ?? null;
@@ -124,7 +120,7 @@ export async function startRefundProcessing(refundId, userId) {
        INNER JOIN payments p ON p.id = r.payment_id
        WHERE r.id = $1 AND p.user_id = $2
        FOR UPDATE OF r`,
-      [refundId, userId]
+      [refundId, userId],
     );
 
     if (result.rowCount === 0) {
@@ -134,9 +130,7 @@ export async function startRefundProcessing(refundId, userId) {
     }
 
     if (result.rows[0].status !== "requested") {
-      const error = new Error(
-        "Only requested refunds can enter processing."
-      );
+      const error = new Error("Only requested refunds can enter processing.");
       error.statusCode = 409;
       throw error;
     }
@@ -146,7 +140,7 @@ export async function startRefundProcessing(refundId, userId) {
        SET status = 'processing'
        WHERE id = $1
        RETURNING *`,
-      [refundId]
+      [refundId],
     );
 
     await client.query("COMMIT");

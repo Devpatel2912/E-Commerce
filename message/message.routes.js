@@ -3,17 +3,17 @@ import { Router } from "express";
 import { authenticateToken } from "../middleware/auth.middleware.js";
 
 import {
-    sendMessage,
-    listConversations,
-    listConversationMessages,
-    readMessage,
-    removeMessage,
+  sendMessage,
+  listConversations,
+  listConversationMessages,
+  readMessage,
+  removeMessage,
 } from "./message.controller.js";
 
 import {
-    validateSendMessage,
-    validateUserId,
-    validateMessageId,
+  validateSendMessage,
+  validateUserId,
+  validateMessageId,
 } from "./message.validation.js";
 
 const router = Router();
@@ -24,22 +24,10 @@ router.post("/", validateSendMessage, sendMessage);
 
 router.get("/conversations", listConversations);
 
-router.get(
-    "/conversation/:userId",
-    validateUserId,
-    listConversationMessages
-);
+router.get("/conversation/:userId", validateUserId, listConversationMessages);
 
-router.patch(
-    "/:messageId/read",
-    validateMessageId,
-    readMessage
-);
+router.patch("/:messageId/read", validateMessageId, readMessage);
 
-router.delete(
-    "/:messageId",
-    validateMessageId,
-    removeMessage
-);
+router.delete("/:messageId", validateMessageId, removeMessage);
 
 export default router;

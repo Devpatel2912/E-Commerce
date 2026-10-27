@@ -3,6 +3,7 @@ import pool from "./config/db.js";
 import config from "./config/env.js";
 import logger from "./config/logger.js";
 import assertDatabaseMigrated from "./config/checkMigrations.js";
+import process from "node:process";
 
 const startServer = async () => {
   try {
@@ -14,7 +15,9 @@ const startServer = async () => {
 
     app.listen(config.port, () => {
       logger.info(`Server running on port ${config.port}`);
-      logger.info(`API base URL: http://localhost:${config.port}${config.apiPrefix}`);
+      logger.info(
+        `API base URL: http://localhost:${config.port}${config.apiPrefix}`,
+      );
     });
   } catch (error) {
     logger.error("Failed to start server:", error);
@@ -23,6 +26,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-
-

@@ -3,17 +3,17 @@ import { Router } from "express";
 import { authenticateToken } from "../middleware/auth.middleware.js";
 
 import {
-  sendMessage,
-  listConversations,
-  listConversationMessages,
-  readMessage,
-  removeMessage,
+    sendMessage,
+    listConversations,
+    listConversationMessages,
+    readMessage,
+    removeMessage,
 } from "./message.controller.js";
 
 import {
-  validateSendMessage,
-  validateUserId,
-  validateMessageId,
+    validateSendMessage,
+    validateUserId,
+    validateMessageId,
 } from "./message.validation.js";
 
 const router = Router();

@@ -1,18 +1,18 @@
 import { Router } from "express";
 
 import {
-  getUsers,
-  getUserById,
-  patchUser,
-  removeUser,
+    getUsers,
+    getUserById,
+    patchUser,
+    removeUser,
 } from "./user.controller.js";
 
 import { authenticateUSer, requiedOwnUser } from "./user.middleware.js";
 
 import {
-  validateUpdateUser,
-  validateUserId,
-  validatePagination,
+    validateUpdateUser,
+    validateUserId,
+    validatePagination,
 } from "./user.validation.js";
 
 const router = Router();
@@ -24,11 +24,11 @@ router.get("/", validatePagination, getUsers);
 router.get("/:id", validateUserId, requiedOwnUser, getUserById);
 
 router.patch(
-  "/:id",
-  validateUserId,
-  requiedOwnUser,
-  validateUpdateUser,
-  patchUser,
+    "/:id",
+    validateUserId,
+    requiedOwnUser,
+    validateUpdateUser,
+    patchUser,
 );
 
 router.delete("/:id", validateUserId, requiedOwnUser, removeUser);

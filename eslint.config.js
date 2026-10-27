@@ -3,30 +3,30 @@ import js from "@eslint/js";
 import globals from "globals";
 
 export default defineConfig([
-  {
-    ignores: ["**/node_modules/**", "dist/**", "build/**", "coverage/**"],
-  },
-  {
-    files: ["**/*.js"],
-
-    plugins: {
-      js,
+    {
+        ignores: ["**/node_modules/**", "dist/**", "build/**", "coverage/**"],
     },
+    {
+        files: ["**/*.js"],
 
-    extends: ["js/recommended"],
+        plugins: {
+            js,
+        },
 
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      globals: {
-        ...globals.node,
-      },
+        extends: ["js/recommended"],
+
+        languageOptions: {
+            ecmaVersion: "latest",
+            sourceType: "module",
+            globals: {
+                ...globals.node,
+            },
+        },
+
+        rules: {
+            "no-unused-vars": "error",
+            "no-undef": "warn",
+            "no-console": "warn",
+        },
     },
-
-    rules: {
-      "no-unused-vars": "warn",
-      "no-undef": "warn",
-      "no-console": "warn",
-    },
-  },
 ]);

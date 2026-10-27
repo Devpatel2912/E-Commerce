@@ -1,14 +1,14 @@
 import pool from "../config/db.js";
 
 export const createTransaction = async ({
-  paymentId,
-  transactionType = "payment",
-  amount,
-  currency = "INR",
-  providerTransactionId = null,
-  status = "pending",
+    paymentId,
+    transactionType = "payment",
+    amount,
+    currency = "INR",
+    providerTransactionId = null,
+    status = "pending",
 }) => {
-  const query = `
+    const query = `
     INSERT INTO transactions (
       payment_id,
       transaction_type,
@@ -22,49 +22,49 @@ export const createTransaction = async ({
               provider_transaction_id, status, created_at
   `;
 
-  const { rows } = await pool.query(query, [
-    paymentId,
-    transactionType,
-    amount,
-    currency,
-    providerTransactionId,
-    status,
-  ]);
+    const { rows } = await pool.query(query, [
+        paymentId,
+        transactionType,
+        amount,
+        currency,
+        providerTransactionId,
+        status,
+    ]);
 
-  return rows[0];
+    return rows[0];
 };
 
 export const getTransactionsByUser = async ({
-  userId,
-  type = "all",
-  limit = 20,
-  offset = 0,
+    userId,
+    type = "all",
+    limit = 20,
+    offset = 0,
 }) => {
-  const conditions = [];
-  const values = [];
+    const conditions = [];
+    const values = [];
 
-  values.push(userId);
+    values.push(userId);
 
-  conditions.push(`
+    conditions.push(`
     (
       p.user_id = $1
       OR l.user_id = $1
     )
   `);
 
-  if (type === "purchase") {
-    conditions.push("p.user_id = $1");
-  } else if (type === "sale") {
-    conditions.push("l.user_id = $1 AND p.user_id <> $1");
-  }
+    if (type === "purchase") {
+        conditions.push("p.user_id = $1");
+    } else if (type === "sale") {
+        conditions.push("l.user_id = $1 AND p.user_id <> $1");
+    }
 
-  values.push(limit);
-  const limitParam = `$${values.length}`;
+    values.push(limit);
+    const limitParam = `$${values.length}`;
 
-  values.push(offset);
-  const offsetParam = `$${values.length}`;
+    values.push(offset);
+    const offsetParam = `$${values.length}`;
 
-  const query = `
+    const query = `
     SELECT
       t.id,
       t.payment_id,
@@ -88,22 +88,22 @@ export const getTransactionsByUser = async ({
     OFFSET ${offsetParam}
   `;
 
-  const { rows } = await pool.query(query, values);
-  return rows;
+    const { rows } = await pool.query(query, values);
+    return rows;
 };
 
 export const countTransactionsByUser = async ({ userId, type = "all" }) => {
-  const conditions = ["(p.user_id = $1 OR l.user_id = $1)"];
+    const conditions = ["(p.user_id = $1 OR l.user_id = $1)"];
 
-  const values = [userId];
+    const values = [userId];
 
-  if (type === "purchase") {
-    conditions.push("p.user_id = $1");
-  } else if (type === "sale") {
-    conditions.push("l.user_id = $1 AND p.user_id <> $1");
-  }
+    if (type === "purchase") {
+        conditions.push("p.user_id = $1");
+    } else if (type === "sale") {
+        conditions.push("l.user_id = $1 AND p.user_id <> $1");
+    }
 
-  const query = `
+    const query = `
     SELECT COUNT(*)::int AS total
     FROM transactions t
     INNER JOIN payments p ON p.id = t.payment_id
@@ -111,12 +111,12 @@ export const countTransactionsByUser = async ({ userId, type = "all" }) => {
     WHERE ${conditions.join(" AND ")}
   `;
 
-  const { rows } = await pool.query(query, values);
-  return rows[0].total;
+    const { rows } = await pool.query(query, values);
+    return rows[0].total;
 };
 
 export const getTransactionById = async ({ transactionId, userId }) => {
-  const query = `
+    const query = `
     SELECT
       t.id,
       t.payment_id,
@@ -142,7 +142,7 @@ export const getTransactionById = async ({ transactionId, userId }) => {
     LIMIT 1
   `;
 
-  const { rows } = await pool.query(query, [transactionId, userId]);
+    const { rows } = await pool.query(query, [transactionId, userId]);
 
-  return rows[0] || null;
+    return rows[0] || null;
 };

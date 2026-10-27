@@ -1,13 +1,13 @@
 import pool from "../config/db.js";
 
 export const createSearchHistory = async ({
-  userId,
-  keyword,
-  categoryId = null,
-  minPrice = null,
-  maxPrice = null,
+    userId,
+    keyword,
+    categoryId = null,
+    minPrice = null,
+    maxPrice = null,
 }) => {
-  const query = `
+    const query = `
     INSERT INTO search_history
       (user_id, keyword, category_id, min_price, max_price)
     VALUES ($1, $2, $3, $4, $5)
@@ -21,19 +21,19 @@ export const createSearchHistory = async ({
       created_at;
   `;
 
-  const { rows } = await pool.query(query, [
-    userId,
-    keyword,
-    categoryId,
-    minPrice,
-    maxPrice,
-  ]);
+    const { rows } = await pool.query(query, [
+        userId,
+        keyword,
+        categoryId,
+        minPrice,
+        maxPrice,
+    ]);
 
-  return rows[0];
+    return rows[0];
 };
 
 export const getSearchHistoryByUserId = async (userId) => {
-  const query = `
+    const query = `
     SELECT
       sh.search_id,
       sh.user_id,
@@ -49,12 +49,12 @@ export const getSearchHistoryByUserId = async (userId) => {
     ORDER BY sh.created_at DESC, sh.search_id DESC;
   `;
 
-  const { rows } = await pool.query(query, [userId]);
-  return rows;
+    const { rows } = await pool.query(query, [userId]);
+    return rows;
 };
 
 export const getSearchHistoryByIdAndUserId = async (searchId, userId) => {
-  const query = `
+    const query = `
     SELECT
       sh.search_id,
       sh.user_id,
@@ -70,12 +70,12 @@ export const getSearchHistoryByIdAndUserId = async (searchId, userId) => {
     LIMIT 1;
   `;
 
-  const { rows } = await pool.query(query, [searchId, userId]);
-  return rows[0] ?? null;
+    const { rows } = await pool.query(query, [searchId, userId]);
+    return rows[0] ?? null;
 };
 
 export const deleteSearchHistoryByIdAndUserId = async (searchId, userId) => {
-  const query = `
+    const query = `
     DELETE FROM search_history
     WHERE search_id = $1 AND user_id = $2
     RETURNING
@@ -88,16 +88,16 @@ export const deleteSearchHistoryByIdAndUserId = async (searchId, userId) => {
       created_at;
   `;
 
-  const { rows } = await pool.query(query, [searchId, userId]);
-  return rows[0] ?? null;
+    const { rows } = await pool.query(query, [searchId, userId]);
+    return rows[0] ?? null;
 };
 
 export const clearSearchHistoryByUserId = async (userId) => {
-  const query = `
+    const query = `
     DELETE FROM search_history
     WHERE user_id = $1;
   `;
 
-  const result = await pool.query(query, [userId]);
-  return result.rowCount ?? 0;
+    const result = await pool.query(query, [userId]);
+    return result.rowCount ?? 0;
 };

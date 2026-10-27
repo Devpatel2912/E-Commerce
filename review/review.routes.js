@@ -2,10 +2,10 @@ import { Router } from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
 
 import {
-  createReview,
-  getReview,
-  updateReview,
-  deleteReview,
+    createReview,
+    getReview,
+    updateReview,
+    deleteReview,
 } from "./review.controller.js";
 
 const router = Router();

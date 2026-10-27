@@ -1,38 +1,38 @@
 import pool from "../config/db.js";
 
 export const createListing = async (data) => {
-  const {
-    user_id,
-    category_id,
-    title,
-    description,
-    price,
-    condition,
-    location,
-  } = data;
+    const {
+        user_id,
+        category_id,
+        title,
+        description,
+        price,
+        condition,
+        location,
+    } = data;
 
-  const query = `
+    const query = `
     INSERT INTO listings
       (user_id, category_id, title, description, price, condition, location)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING *;
   `;
 
-  const { rows } = await pool.query(query, [
-    user_id,
-    category_id,
-    title,
-    description ?? null,
-    price,
-    condition,
-    location,
-  ]);
+    const { rows } = await pool.query(query, [
+        user_id,
+        category_id,
+        title,
+        description ?? null,
+        price,
+        condition,
+        location,
+    ]);
 
-  return rows[0];
+    return rows[0];
 };
 
 export const getAllListings = async () => {
-  const query = `
+    const query = `
     SELECT
       l.*,
       c.name AS category_name
@@ -42,12 +42,12 @@ export const getAllListings = async () => {
     ORDER BY l.created_at DESC;
   `;
 
-  const { rows } = await pool.query(query);
-  return rows;
+    const { rows } = await pool.query(query);
+    return rows;
 };
 
 export const getListingById = async (listing_id) => {
-  const query = `
+    const query = `
     SELECT
       l.*,
       c.name AS category_name
@@ -56,40 +56,40 @@ export const getListingById = async (listing_id) => {
     WHERE l.listing_id = $1;
   `;
 
-  const { rows } = await pool.query(query, [listing_id]);
-  return rows[0] ?? null;
+    const { rows } = await pool.query(query, [listing_id]);
+    return rows[0] ?? null;
 };
 
 export const updateListing = async (listing_id, user_id, data) => {
-  const allowedFields = [
-    "category_id",
-    "title",
-    "description",
-    "price",
-    "condition",
-    "location",
-    "status",
-  ];
+    const allowedFields = [
+        "category_id",
+        "title",
+        "description",
+        "price",
+        "condition",
+        "location",
+        "status",
+    ];
 
-  const fields = [];
-  const values = [];
-  let index = 1;
+    const fields = [];
+    const values = [];
+    let index = 1;
 
-  for (const field of allowedFields) {
-    if (data[field] !== undefined) {
-      fields.push(`${field} = $${index++}`);
-      values.push(data[field]);
+    for (const field of allowedFields) {
+        if (data[field] !== undefined) {
+            fields.push(`${field} = $${index++}`);
+            values.push(data[field]);
+        }
     }
-  }
 
-  if (fields.length === 0) {
-    return null;
-  }
+    if (fields.length === 0) {
+        return null;
+    }
 
-  fields.push("updated_at = NOW()");
-  values.push(listing_id, user_id);
+    fields.push("updated_at = NOW()");
+    values.push(listing_id, user_id);
 
-  const query = `
+    const query = `
     UPDATE listings
     SET ${fields.join(", ")}
     WHERE listing_id = $${index++}
@@ -97,17 +97,17 @@ export const updateListing = async (listing_id, user_id, data) => {
     RETURNING *;
   `;
 
-  const { rows } = await pool.query(query, values);
-  return rows[0] ?? null;
+    const { rows } = await pool.query(query, values);
+    return rows[0] ?? null;
 };
 
 export const deleteListing = async (listing_id, user_id) => {
-  const query = `
+    const query = `
     DELETE FROM listings
     WHERE listing_id = $1 AND user_id = $2
     RETURNING *;
   `;
 
-  const { rows } = await pool.query(query, [listing_id, user_id]);
-  return rows[0] ?? null;
+    const { rows } = await pool.query(query, [listing_id, user_id]);
+    return rows[0] ?? null;
 };

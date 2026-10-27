@@ -2,9 +2,9 @@ import { Router } from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
 
 import {
-  listPaymentMethods,
-  initiatePayment,
-  getPaymentStatus,
+    listPaymentMethods,
+    initiatePayment,
+    getPaymentStatus,
 } from "./payment.controller.js";
 
 const router = Router();

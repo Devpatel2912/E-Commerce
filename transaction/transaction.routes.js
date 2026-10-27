@@ -3,8 +3,8 @@ import { Router } from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
 
 import {
-  getMyTransactions,
-  getTransactionDetails,
+    getMyTransactions,
+    getTransactionDetails,
 } from "./transaction.controller.js";
 
 const router = Router();

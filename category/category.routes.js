@@ -1,17 +1,17 @@
 import { Router } from "express";
 
 import {
-  createCategory,
-  getAllCategories,
-  getCategoryById,
-  updateCategory,
-  deleteCategory,
+    createCategory,
+    getAllCategories,
+    getCategoryById,
+    updateCategory,
+    deleteCategory,
 } from "./category.controller.js";
 
 import {
-  validateCategory,
-  validateCategoryUpdate,
-  validateCategoryId,
+    validateCategory,
+    validateCategoryUpdate,
+    validateCategoryId,
 } from "./category.validation.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -24,11 +24,11 @@ router.get("/:id", validateCategoryId, getCategoryById);
 router.post("/", authMiddleware, validateCategory, createCategory);
 
 router.patch(
-  "/:id",
-  authMiddleware,
-  validateCategoryId,
-  validateCategoryUpdate,
-  updateCategory,
+    "/:id",
+    authMiddleware,
+    validateCategoryId,
+    validateCategoryUpdate,
+    updateCategory,
 );
 
 router.delete("/:id", authMiddleware, validateCategoryId, deleteCategory);

@@ -1,10 +1,10 @@
 import { Router } from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
 import {
-  saveSearchHistory,
-  getSearchHistory,
-  deleteSearchHistoryItem,
-  clearSearchHistory,
+    saveSearchHistory,
+    getSearchHistory,
+    deleteSearchHistoryItem,
+    clearSearchHistory,
 } from "./search-history.controller.js";
 
 const router = Router();

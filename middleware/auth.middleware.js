@@ -34,5 +34,37 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-export { authMiddleware, authMiddleware as authenticateToken };
+const optionalAuthMiddleware = (req, res, next) => {
+    const authorization = req.headers.authorization;
+
+    if (!authorization?.startsWith("Bearer ")) {
+        return next();
+    }
+
+    const token = authorization.slice(7).trim();
+    if (!token) {
+        return next();
+    }
+
+    try {
+        const decoded = jwt.verify(token, config.jwt.accessSecret);
+        if (typeof decoded === "object" && decoded.sub && decoded.email) {
+            req.user = {
+                id: decoded.sub,
+                email: decoded.email,
+                role: decoded.role || "user",
+            };
+        }
+    } catch {
+        req.user = undefined;
+    }
+
+    next();
+};
+
+export {
+    authMiddleware,
+    authMiddleware as authenticateToken,
+    optionalAuthMiddleware,
+};
 export default authMiddleware;

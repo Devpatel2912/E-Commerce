@@ -10,7 +10,9 @@ import {
     validateImageIdParam,
 } from "./listing-image.validation.js";
 
-import authMiddleware from "../middleware/auth.middleware.js";
+import authMiddleware, {
+    optionalAuthMiddleware,
+} from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -45,6 +47,7 @@ router.post(
 
 router.get(
     "/listing/:listingId",
+    optionalAuthMiddleware,
     validateListingIdParam,
     ListingImageController.retrieveListingImages,
 );

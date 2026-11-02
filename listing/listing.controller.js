@@ -13,11 +13,12 @@ const ListingController = {
             const listing = await createListingService({
                 userId,
                 data: req.body,
+                files: req.files || (req.file ? [req.file] : []),
             });
 
             return res.status(201).json({
                 success: true,
-                message: "Listing created successfully.",
+                message: listing.message || "Listing created successfully.",
                 data: listing,
             });
         } catch (error) {
@@ -41,7 +42,12 @@ const ListingController = {
 
     getListingById: async (req, res, next) => {
         try {
-            const listing = await getListingByIdService(req.params.id);
+            const userId = req.user?.id ?? req.user?.user_id;
+            const listing = await getListingByIdService({
+                id: req.params.id,
+                userId,
+                role: req.user?.role,
+            });
 
             return res.status(200).json({
                 success: true,

@@ -8,7 +8,9 @@ import {
     validateListingId,
 } from "./listing.validation.js";
 
-import authMiddleware from "../middleware/auth.middleware.js";
+import authMiddleware, {
+    optionalAuthMiddleware,
+} from "../middleware/auth.middleware.js";
 import ReviewController from "../review/review.controller.js";
 import ListingImageController from "../listing-image/listing-image.controller.js";
 
@@ -16,29 +18,42 @@ import multer from "multer";
 
 const router = Router();
 
-const upload = multer({
+const uploadListingImages = multer({
     storage: multer.memoryStorage(),
     limits: {
         fileSize: 5 * 1024 * 1024,
-        files: 1,
     },
-});
+}).fields([
+    { name: "images", maxCount: 10 },
+    { name: "image", maxCount: 1 },
+]);
+
+const normalizeUploadedFiles = (req, _res, next) => {
+    if (req.files) {
+        const images = req.files.images || [];
+        const singleImage = req.files.image || [];
+        req.files = [...images, ...singleImage];
+    } else if (req.file) {
+        req.files = [req.file];
+    } else {
+        req.files = [];
+    }
+    next();
+};
 
 router.get("/", ListingController.getAllListings);
-router.get("/:id", validateListingId, ListingController.getListingById);
+router.get(
+    "/:id",
+    optionalAuthMiddleware,
+    validateListingId,
+    ListingController.getListingById,
+);
 router.get("/:id/reviews", ReviewController.getListingReviews);
 router.get(
     "/:id/images",
+    optionalAuthMiddleware,
     validateListingId,
     ListingImageController.retrieveListingImages,
-);
-
-router.post(
-    "/:id/images",
-    authMiddleware,
-    validateListingId,
-    upload.single("image"),
-    ListingImageController.uploadListingImage,
 );
 router.delete(
     "/:id/images/:imageId",
@@ -50,6 +65,8 @@ router.delete(
 router.post(
     "/",
     authMiddleware,
+    uploadListingImages,
+    normalizeUploadedFiles,
     validateCreateListing,
     ListingController.createListing,
 );

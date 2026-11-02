@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { LISTING_IMAGE_STATUS } from "../constants/status.constants.js";
 
 export const createListingImage = async ({
     listingId,
@@ -7,6 +8,7 @@ export const createListingImage = async ({
     fileSize = null,
     imageUrl = null,
     isPrimary = false,
+    status = LISTING_IMAGE_STATUS.COMPLETED,
 }) => {
     const client = await pool.connect();
 
@@ -22,9 +24,9 @@ export const createListingImage = async ({
 
         const query = `
       INSERT INTO listing_images
-        (listing_id, object_key, content_type, file_size, image_url, is_primary)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING image_id, listing_id, object_key, content_type, file_size, image_url, is_primary, created_at
+        (listing_id, object_key, content_type, file_size, image_url, is_primary, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING image_id, listing_id, object_key, content_type, file_size, image_url, is_primary, status, created_at
     `;
 
         const { rows } = await client.query(query, [
@@ -34,6 +36,7 @@ export const createListingImage = async ({
             fileSize,
             imageUrl,
             isPrimary,
+            status,
         ]);
 
         await client.query("COMMIT");
@@ -46,13 +49,76 @@ export const createListingImage = async ({
     }
 };
 
-export const getListingImages = async (listingId) => {
-    const query = `
-    SELECT image_id, listing_id, object_key, content_type, file_size, image_url, is_primary, created_at
+export const updateListingImageProcessing = async (
+    imageId,
+    { status, isPrimary, fileSize, contentType },
+) => {
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+
+        if (isPrimary) {
+            const { rows: imgRows } = await client.query(
+                "SELECT listing_id FROM listing_images WHERE image_id = $1",
+                [imageId],
+            );
+            if (imgRows[0]) {
+                await client.query(
+                    `UPDATE listing_images SET is_primary = FALSE WHERE listing_id = $1`,
+                    [imgRows[0].listing_id],
+                );
+            }
+        }
+
+        const fields = ["status = $1"];
+        const values = [status];
+        let idx = 2;
+
+        if (isPrimary !== undefined) {
+            fields.push(`is_primary = $${idx++}`);
+            values.push(isPrimary);
+        }
+        if (fileSize !== undefined) {
+            fields.push(`file_size = $${idx++}`);
+            values.push(fileSize);
+        }
+        if (contentType !== undefined) {
+            fields.push(`content_type = $${idx++}`);
+            values.push(contentType);
+        }
+
+        values.push(imageId);
+
+        const query = `
+            UPDATE listing_images
+            SET ${fields.join(", ")}
+            WHERE image_id = $${idx}
+            RETURNING image_id, listing_id, object_key, content_type, file_size, image_url, is_primary, status, created_at
+        `;
+
+        const { rows } = await client.query(query, values);
+        await client.query("COMMIT");
+        return rows[0] ?? null;
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
+export const getListingImages = async (listingId, includePending = false) => {
+    let query = `
+    SELECT image_id, listing_id, object_key, content_type, file_size, image_url, is_primary, status, created_at
     FROM listing_images
     WHERE listing_id = $1
-    ORDER BY is_primary DESC, created_at ASC
   `;
+
+    if (!includePending) {
+        query += ` AND status = '${LISTING_IMAGE_STATUS.COMPLETED}'`;
+    }
+
+    query += ` ORDER BY is_primary DESC, created_at ASC;`;
 
     const { rows } = await pool.query(query, [listingId]);
     return rows;

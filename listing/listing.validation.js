@@ -1,5 +1,12 @@
-const validConditions = ["new", "used"];
-const validStatuses = ["active", "sold", "inactive"];
+import {
+    VALID_LISTING_STATUSES,
+    VALID_CONDITIONS,
+} from "../constants/status.constants.js";
+import {
+    ALLOWED_IMAGE_MIME_TYPES,
+    MAX_IMAGE_SIZE_BYTES,
+    MAX_IMAGES_PER_LISTING,
+} from "../config/storage.js";
 
 export const validateCreateListing = (req, res, next) => {
     if (!req.body || typeof req.body !== "object") {
@@ -47,14 +54,39 @@ export const validateCreateListing = (req, res, next) => {
         );
     }
 
-    if (!validConditions.includes(condition)) {
-        errors.push("condition must be 'new' or 'used'.");
+    if (!VALID_CONDITIONS.includes(condition)) {
+        errors.push(
+            `condition must be one of: ${VALID_CONDITIONS.join(", ")}.`,
+        );
     }
 
     if (typeof location !== "string" || !location.trim()) {
         errors.push("location is required.");
     } else if (location.trim().length > 150) {
         errors.push("location must not exceed 150 characters.");
+    }
+
+    // Validate uploaded images if present in multipart/form-data
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        if (req.files.length > MAX_IMAGES_PER_LISTING) {
+            errors.push(
+                `Maximum limit of ${MAX_IMAGES_PER_LISTING} images allowed.`,
+            );
+        }
+
+        req.files.forEach((file, index) => {
+            if (!ALLOWED_IMAGE_MIME_TYPES.has(file.mimetype)) {
+                errors.push(
+                    `File ${index + 1} (${file.originalname}) has invalid format. Only JPEG, PNG, and WebP are allowed.`,
+                );
+            }
+            if (file.size > MAX_IMAGE_SIZE_BYTES) {
+                const maxMb = (MAX_IMAGE_SIZE_BYTES / (1024 * 1024)).toFixed(0);
+                errors.push(
+                    `File ${index + 1} (${file.originalname}) exceeds maximum size limit of ${maxMb}MB.`,
+                );
+            }
+        });
     }
 
     if (errors.length) {
@@ -158,8 +190,10 @@ export const validateUpdateListing = (req, res, next) => {
         }
     }
 
-    if (condition !== undefined && !validConditions.includes(condition)) {
-        errors.push("condition must be 'new' or 'used'.");
+    if (condition !== undefined && !VALID_CONDITIONS.includes(condition)) {
+        errors.push(
+            `condition must be one of: ${VALID_CONDITIONS.join(", ")}.`,
+        );
     }
 
     if (location !== undefined) {
@@ -172,8 +206,10 @@ export const validateUpdateListing = (req, res, next) => {
         }
     }
 
-    if (status !== undefined && !validStatuses.includes(status)) {
-        errors.push("status must be active, sold, or inactive.");
+    if (status !== undefined && !VALID_LISTING_STATUSES.includes(status)) {
+        errors.push(
+            `status must be one of: ${VALID_LISTING_STATUSES.join(", ")}.`,
+        );
     }
 
     if (category_id !== undefined) {

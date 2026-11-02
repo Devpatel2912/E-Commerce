@@ -200,6 +200,19 @@ export const verifyStorageObjectContent = async (objectKey) => {
     }
 };
 
+export const downloadStorageObjectBuffer = async (objectKey) => {
+    const command = new GetObjectCommand({
+        Bucket: STORAGE_BUCKET,
+        Key: objectKey,
+    });
+    const response = await s3Client.send(command);
+    const chunks = [];
+    for await (const chunk of response.Body) {
+        chunks.push(chunk);
+    }
+    return Buffer.concat(chunks);
+};
+
 export const deleteStorageObject = async (objectKey) => {
     if (!objectKey) {
         return false;

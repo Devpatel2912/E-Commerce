@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { LISTING_STATUS } from "../constants/status.constants.js";
 
 export const createListing = async (data) => {
     const {
@@ -9,12 +10,13 @@ export const createListing = async (data) => {
         price,
         condition,
         location,
+        status = LISTING_STATUS.PENDING,
     } = data;
 
     const query = `
     INSERT INTO listings
-      (user_id, category_id, title, description, price, condition, location)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (user_id, category_id, title, description, price, condition, location, status)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *;
   `;
 
@@ -26,6 +28,7 @@ export const createListing = async (data) => {
         price,
         condition,
         location,
+        status,
     ]);
 
     return rows[0];
@@ -38,11 +41,11 @@ export const getAllListings = async () => {
       c.name AS category_name
     FROM listings l
     JOIN categories c ON c.id = l.category_id
-    WHERE l.status = 'active'
+    WHERE l.status = $1
     ORDER BY l.created_at DESC;
   `;
 
-    const { rows } = await pool.query(query);
+    const { rows } = await pool.query(query, [LISTING_STATUS.ACTIVE]);
     return rows;
 };
 
@@ -98,6 +101,18 @@ export const updateListing = async (listing_id, user_id, data) => {
   `;
 
     const { rows } = await pool.query(query, values);
+    return rows[0] ?? null;
+};
+
+export const updateListingStatus = async (listing_id, status) => {
+    const query = `
+    UPDATE listings
+    SET status = $1, updated_at = NOW()
+    WHERE listing_id = $2
+    RETURNING *;
+  `;
+
+    const { rows } = await pool.query(query, [status, listing_id]);
     return rows[0] ?? null;
 };
 

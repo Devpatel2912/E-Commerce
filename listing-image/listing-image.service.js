@@ -11,7 +11,11 @@ import {
     deleteListingImage,
 } from "./listing-image.model.js";
 
-import { getListingById } from "../listing/listing.model.js";
+import {
+    getListingById,
+    updateListingStatus,
+} from "../listing/listing.model.js";
+import { enqueueImageProcessingJob } from "../jobs/image.queue.js";
 
 import {
     generatePresignedUploadUrl,
@@ -27,6 +31,10 @@ import {
     PRESIGNED_URL_EXPIRES_IN,
     MIME_TO_EXTENSION,
 } from "../config/storage.js";
+import {
+    LISTING_STATUS,
+    LISTING_IMAGE_STATUS,
+} from "../constants/status.constants.js";
 import ApiError from "../utils/ApiError.js";
 import logger from "../config/logger.js";
 
@@ -179,6 +187,19 @@ export const completeListingImageUploadService = async ({
         contentType: verification.detectedMime || storageMeta.contentType,
         fileSize: storageMeta.contentLength,
         isPrimary: finalIsPrimary,
+        status: LISTING_IMAGE_STATUS.PENDING,
+    });
+
+    if (listing.status === LISTING_STATUS.PENDING) {
+        await updateListingStatus(listing_id, LISTING_STATUS.PROCESSING);
+    }
+
+    await enqueueImageProcessingJob({
+        listingId: listing_id,
+        objectKey: object_key,
+        isPrimary: finalIsPrimary,
+        userId,
+        imageId: imageRecord.image_id,
     });
 
     const accessUrl = await generatePresignedDownloadUrl({
@@ -187,6 +208,9 @@ export const completeListingImageUploadService = async ({
 
     return {
         ...imageRecord,
+        status: "pending",
+        processing_message:
+            "Image queued for processing and metadata removal. Listing will become active upon completion.",
         access_url: accessUrl,
         image_url: accessUrl,
     };
@@ -202,18 +226,20 @@ export const retrieveListingImagesService = async ({
         throw new ApiError(404, "Listing not found.");
     }
 
-    if (listing.status !== "active") {
-        const isOwner = userId && String(listing.user_id) === String(userId);
-        const isAdmin = role === "admin";
+    const isOwner = userId && String(listing.user_id) === String(userId);
+    const isAdmin = role === "admin";
+
+    if (listing.status !== LISTING_STATUS.ACTIVE) {
         if (!isOwner && !isAdmin) {
             throw new ApiError(
-                403,
-                "Access denied. Listing is not currently active.",
+                404,
+                "Listing not found or is currently processing.",
             );
         }
     }
 
-    const images = await getListingImages(listingId);
+    const includePending = Boolean(isOwner || isAdmin);
+    const images = await getListingImages(listingId, includePending);
 
     const resolvedImages = await Promise.all(
         images.map(async (img) => {
@@ -404,6 +430,19 @@ export const uploadListingImageService = async ({
             contentType: detectedMime,
             fileSize: file.size || file.buffer.length,
             isPrimary: finalIsPrimary,
+            status: "pending",
+        });
+
+        if (listing.status === "pending") {
+            await updateListingStatus(numericListingId, "processing");
+        }
+
+        await enqueueImageProcessingJob({
+            listingId: numericListingId,
+            objectKey,
+            isPrimary: finalIsPrimary,
+            userId,
+            imageId: imageRecord.image_id,
         });
 
         const accessUrl = await generatePresignedDownloadUrl({
@@ -412,6 +451,9 @@ export const uploadListingImageService = async ({
 
         return {
             ...imageRecord,
+            status: "pending",
+            processing_message:
+                "Image uploaded and queued for processing. Listing will become active upon completion.",
             access_url: accessUrl,
             image_url: accessUrl,
         };

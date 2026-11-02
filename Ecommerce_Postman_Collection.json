@@ -921,26 +921,58 @@
                             ]
                         },
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
+                        "header": [],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"category_id\": 1,\n  \"title\": \"iPhone 13 Pro 128GB Sierra Blue\",\n  \"description\": \"Excellent condition iPhone 13 Pro with 90% battery health and original box.\",\n  \"price\": 45000,\n  \"condition\": \"used\",\n  \"location\": \"Mumbai, India\"\n}"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "title",
+                                    "value": "iPhone 13 Pro 128GB Sierra Blue",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "category_id",
+                                    "value": "1",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "45000",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "condition",
+                                    "value": "used",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "location",
+                                    "value": "Mumbai, India",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "Excellent condition iPhone 13 Pro with 90% battery health and original box.",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "images",
+                                    "type": "file",
+                                    "src": "",
+                                    "description": "Upload multiple product images (JPEG, PNG, WebP max 5MB). The first image is set as primary and geographical/EXIF metadata is stripped by background worker."
+                                }
+                            ]
                         },
                         "url": {
                             "raw": "{{baseUrl}}/api/v1/listings",
                             "host": ["{{baseUrl}}"],
                             "path": ["api", "v1", "listings"]
                         },
-                        "description": "Create a new product listing."
+                        "description": "Create a new product listing with multiple images upload via multipart/form-data. First image is marked primary, private EXIF/location metadata is stripped by background worker, and listing becomes active upon processing completion."
                     },
                     "response": [
                         {
-                            "name": "201 Created",
+                            "name": "201 Created (With Multiple Images Processing)",
                             "status": "Created",
                             "code": 201,
                             "_postman_previewlanguage": "json",
@@ -950,7 +982,7 @@
                                     "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing created successfully.\",\n  \"data\": {\n    \"id\": \"2\",\n    \"user_id\": \"3\",\n    \"category_id\": 1,\n    \"title\": \"iPhone 13 Pro 128GB Sierra Blue\",\n    \"description\": \"Excellent condition iPhone 13 Pro with 90% battery health and original box.\",\n    \"price\": \"45000.00\",\n    \"condition\": \"used\",\n    \"location\": \"Mumbai, India\",\n    \"status\": \"active\",\n    \"created_at\": \"2026-10-21T06:40:00.000Z\"\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing created successfully. Images are queued for processing and metadata removal; listing will become active shortly.\",\n  \"data\": {\n    \"listing_id\": 2,\n    \"user_id\": 3,\n    \"category_id\": 1,\n    \"title\": \"iPhone 13 Pro 128GB Sierra Blue\",\n    \"description\": \"Excellent condition iPhone 13 Pro with 90% battery health and original box.\",\n    \"price\": 45000,\n    \"condition\": \"used\",\n    \"location\": \"Mumbai, India\",\n    \"status\": \"processing\",\n    \"images\": [\n      {\n        \"image_id\": 1,\n        \"listing_id\": 2,\n        \"object_key\": \"listings/2/sample-uuid-1.jpg\",\n        \"content_type\": \"image/jpeg\",\n        \"file_size\": 245760,\n        \"is_primary\": true,\n        \"status\": \"pending\",\n        \"access_url\": \"https://storage-endpoint.aws.neon.tech/products/listings/2/sample-uuid-1.jpg\"\n      },\n      {\n        \"image_id\": 2,\n        \"listing_id\": 2,\n        \"object_key\": \"listings/2/sample-uuid-2.jpg\",\n        \"content_type\": \"image/jpeg\",\n        \"file_size\": 198420,\n        \"is_primary\": false,\n        \"status\": \"pending\",\n        \"access_url\": \"https://storage-endpoint.aws.neon.tech/products/listings/2/sample-uuid-2.jpg\"\n      }\n    ],\n    \"created_at\": \"2026-11-02T06:00:00.000Z\"\n  }\n}"
                         }
                     ]
                 },
@@ -1045,23 +1077,7 @@
             "name": "06. Listing Images",
             "item": [
                 {
-                    "name": "Upload Listing Image (form-data to Neon Object Storage)",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "if (pm.response.code === 201) {",
-                                    "    var json = pm.response.json();",
-                                    "    if (json.data && json.data.image_id) {",
-                                    "        pm.collectionVariables.set('imageId', json.data.image_id);",
-                                    "    }",
-                                    "}"
-                                ]
-                            }
-                        }
-                    ],
+                    "name": "Get Listing Images",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -1073,19 +1089,8 @@
                                 }
                             ]
                         },
-                        "method": "POST",
+                        "method": "GET",
                         "header": [],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "image",
-                                    "type": "file",
-                                    "src": "",
-                                    "description": "Select an image file (JPEG, PNG, WebP max 5MB) from your device"
-                                }
-                            ]
-                        },
                         "url": {
                             "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}/images",
                             "host": ["{{baseUrl}}"],
@@ -1097,168 +1102,7 @@
                                 "images"
                             ]
                         },
-                        "description": "Upload an image directly from your device using multipart/form-data. The backend streams the file to Neon Object Storage and saves the record in PostgreSQL."
-                    },
-                    "response": [
-                        {
-                            "name": "201 Created - Uploaded to Neon Object Storage",
-                            "status": "Created",
-                            "code": 201,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing image uploaded successfully to Neon Object Storage.\",\n  \"data\": {\n    \"image_id\": \"7\",\n    \"listing_id\": \"1\",\n    \"object_key\": \"listings/1/3274be59-e925-4c02-abfa-4fbb1cf9be32.jpg\",\n    \"content_type\": \"image/jpeg\",\n    \"file_size\": 102400,\n    \"is_primary\": true,\n    \"access_url\": \"https://<branch>.storage.c-2.<region>.aws.neon.tech/<bucket>/listings/1/3274be59-e925-4c02-abfa-4fbb1cf9be32.jpg?...\",\n    \"image_url\": \"https://<branch>.storage.c-2.<region>.aws.neon.tech/<bucket>/listings/1/3274be59-e925-4c02-abfa-4fbb1cf9be32.jpg?...\",\n    \"created_at\": \"2026-10-22T06:00:00.000Z\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Presign Listing Image Upload (Neon Object Storage)",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    var json = pm.response.json();",
-                                    "    if (json.data && json.data.upload_url) {",
-                                    "        pm.collectionVariables.set('uploadUrl', json.data.upload_url);",
-                                    "        pm.collectionVariables.set('objectKey', json.data.object_key);",
-                                    "    }",
-                                    "}"
-                                ]
-                            }
-                        }
-                    ],
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"listing_id\": {{listingId}},\n  \"filename\": \"sample-product.jpg\",\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 245760\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/listing-images/presign",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "listing-images", "presign"]
-                        },
-                        "description": "Request a short-lived presigned PUT URL and server-generated object key to directly upload image bytes to Neon Object Storage from Flutter or frontend."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK - Presigned URL Generated",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Presigned upload URL generated successfully.\",\n  \"data\": {\n    \"upload_url\": \"https://<branch>.storage.c-2.<region>.aws.neon.tech/<bucket>/listings/1/uuid.jpg?...\",\n    \"object_key\": \"listings/1/uuid.jpg\",\n    \"http_method\": \"PUT\",\n    \"expires_in\": 900,\n    \"required_headers\": {\n      \"Content-Type\": \"image/jpeg\"\n    }\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Complete Listing Image Upload (Neon Object Storage)",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "if (pm.response.code === 201) {",
-                                    "    var json = pm.response.json();",
-                                    "    if (json.data && json.data.image_id) {",
-                                    "        pm.collectionVariables.set('imageId', json.data.image_id);",
-                                    "    }",
-                                    "}"
-                                ]
-                            }
-                        }
-                    ],
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"listing_id\": {{listingId}},\n  \"object_key\": \"{{objectKey}}\",\n  \"is_primary\": true\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/listing-images/complete",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "listing-images", "complete"]
-                        },
-                        "description": "Verifies the uploaded object in Neon Object Storage, validates actual magic bytes and content length, and persists durable metadata in PostgreSQL."
-                    },
-                    "response": [
-                        {
-                            "name": "201 Created - Upload Verified & Saved",
-                            "status": "Created",
-                            "code": 201,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing image verified and saved successfully.\",\n  \"data\": {\n    \"image_id\": \"1\",\n    \"listing_id\": \"1\",\n    \"object_key\": \"listings/1/uuid.jpg\",\n    \"content_type\": \"image/jpeg\",\n    \"file_size\": 245760,\n    \"is_primary\": true,\n    \"access_url\": \"https://<branch>.storage.c-2.<region>.aws.neon.tech/<bucket>/listings/1/uuid.jpg?...\",\n    \"image_url\": \"https://<branch>.storage.c-2.<region>.aws.neon.tech/<bucket>/listings/1/uuid.jpg?...\",\n    \"created_at\": \"2026-10-22T06:00:00.000Z\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Get Images by Listing ID",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/listing-images/listing/{{listingId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "listing-images",
-                                "listing",
-                                "{{listingId}}"
-                            ]
-                        },
-                        "description": "Retrieve all images for a listing with freshly signed presigned access URLs for display."
+                        "description": "Retrieve all images for a listing. Public users only see processed/completed images; owner and admin can also see pending images."
                     },
                     "response": [
                         {
@@ -1272,123 +1116,12 @@
                                     "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing images retrieved successfully.\",\n  \"count\": 1,\n  \"data\": [\n    {\n      \"image_id\": \"1\",\n      \"listing_id\": \"1\",\n      \"object_key\": \"listings/1/uuid.jpg\",\n      \"content_type\": \"image/jpeg\",\n      \"file_size\": 245760,\n      \"is_primary\": true,\n      \"access_url\": \"https://<branch>.storage.c-2.<region>.aws.neon.tech/<bucket>/listings/1/uuid.jpg?...\",\n      \"created_at\": \"2026-10-22T06:00:00.000Z\"\n    }\n  ]\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Get Image Signed Access URL",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/listing-images/{{imageId}}/url",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "listing-images",
-                                "{{imageId}}",
-                                "url"
-                            ]
-                        },
-                        "description": "Generate a fresh presigned GET URL for a private listing image."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"image_id\": \"1\",\n    \"listing_id\": \"1\",\n    \"object_key\": \"listings/1/uuid.jpg\",\n    \"access_url\": \"https://<branch>.storage.c-2.<region>.aws.neon.tech/<bucket>/listings/1/uuid.jpg?...\",\n    \"expires_in\": 3600\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing images retrieved successfully.\",\n  \"count\": 2,\n  \"data\": [\n    {\n      \"image_id\": 1,\n      \"listing_id\": 1,\n      \"object_key\": \"listings/1/sample-uuid-1.jpg\",\n      \"content_type\": \"image/jpeg\",\n      \"file_size\": 245760,\n      \"is_primary\": true,\n      \"status\": \"completed\",\n      \"access_url\": \"https://storage-endpoint.aws.neon.tech/products/listings/1/sample-uuid-1.jpg\"\n    },\n    {\n      \"image_id\": 2,\n      \"listing_id\": 1,\n      \"object_key\": \"listings/1/sample-uuid-2.jpg\",\n      \"content_type\": \"image/jpeg\",\n      \"file_size\": 198420,\n      \"is_primary\": false,\n      \"status\": \"completed\",\n      \"access_url\": \"https://storage-endpoint.aws.neon.tech/products/listings/1/sample-uuid-2.jpg\"\n    }\n  ]\n}"
                         }
                     ]
                 },
                 {
                     "name": "Delete Listing Image",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "DELETE",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/listing-images/{{imageId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "listing-images",
-                                "{{imageId}}"
-                            ]
-                        },
-                        "description": "Safely delete an image from Neon Object Storage and PostgreSQL. Verifies seller ownership or administrator role."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing image deleted successfully.\",\n  \"data\": {\n    \"image_id\": \"1\",\n    \"listing_id\": \"1\",\n    \"object_key\": \"listings/1/uuid.jpg\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Get Listing Images (Legacy Route)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/listings/{{listingId}}/images",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "listings",
-                                "{{listingId}}",
-                                "images"
-                            ]
-                        },
-                        "description": "Legacy route to retrieve all images associated with a listing."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing images retrieved successfully.\",\n  \"count\": 1,\n  \"data\": [\n    {\n      \"image_id\": \"1\",\n      \"listing_id\": \"1\",\n      \"object_key\": \"listings/1/uuid.jpg\",\n      \"access_url\": \"https://...\",\n      \"is_primary\": true\n    }\n  ]\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Delete Listing Image (Legacy Route)",
                     "request": {
                         "auth": {
                             "type": "bearer",
@@ -1414,7 +1147,7 @@
                                 "{{imageId}}"
                             ]
                         },
-                        "description": "Legacy route to delete an image by imageId for a listing."
+                        "description": "Delete a specific image from a listing. Requires listing ownership or admin role. Automatically reassigns primary image if the primary was deleted."
                     },
                     "response": [
                         {
@@ -1428,11 +1161,12 @@
                                     "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing image deleted successfully.\",\n  \"data\": {\n    \"image_id\": \"1\",\n    \"listing_id\": \"1\",\n    \"object_key\": \"listings/1/uuid.jpg\"\n  }\n}"
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing image removed successfully.\",\n  \"data\": {\n    \"image_id\": 1,\n    \"listing_id\": 1,\n    \"object_key\": \"listings/1/sample-uuid-1.jpg\",\n    \"is_primary\": true\n  }\n}"
                         }
                     ]
                 }
-            ]
+            ],
+            "description": "Endpoints for viewing and deleting images associated with a listing."
         },
         {
             "name": "07. Search History",

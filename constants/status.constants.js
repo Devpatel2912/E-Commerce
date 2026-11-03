@@ -1,8 +1,3 @@
-/**
- * Centralized Enum Constants for Listings and Listing Images.
- * Used across models, services, controllers, validations, and workers.
- */
-
 export const LISTING_STATUS = Object.freeze({
     PENDING: "pending",
     PROCESSING: "processing",

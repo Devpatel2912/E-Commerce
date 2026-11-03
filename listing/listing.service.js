@@ -63,7 +63,7 @@ export const createListingService = async ({ userId, data, files = [] }) => {
                 status: LISTING_IMAGE_STATUS.PENDING,
             });
 
-            // Enqueue background processing job (strips EXIF/GPS, marks completed, activates listing)
+            // Enqueue background processing
             await enqueueImageProcessingJob({
                 listingId: listing.listing_id,
                 objectKey,
@@ -85,7 +85,6 @@ export const createListingService = async ({ userId, data, files = [] }) => {
     }
 
     return {
-        ...listing,
         images: uploadedImages,
         message: hasImages
             ? "Listing created successfully. Images are queued for processing and metadata removal; listing will become active shortly."

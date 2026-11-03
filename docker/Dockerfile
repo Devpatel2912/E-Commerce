@@ -17,13 +17,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+COPY --chown=node:node . .
+
 COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
-
-COPY --chown=node:node package.json ./
-
-COPY --chown=node:node server.js app.js ./
-
-COPY --chown=node:node admin auth category config listing listing-image message middleware migrations payment refund review routes search-history transaction users utils ./
 
 USER node
 

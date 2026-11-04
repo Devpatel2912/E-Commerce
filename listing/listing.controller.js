@@ -46,7 +46,6 @@ const ListingController = {
             const listing = await getListingByIdService({
                 id: req.params.id,
                 userId,
-                role: req.user?.role,
             });
 
             return res.status(200).json({

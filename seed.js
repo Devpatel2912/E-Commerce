@@ -2,7 +2,6 @@ import pool from "./config/db.js";
 import logger from "./config/logger.js";
 import assertDatabaseMigrated from "./config/checkMigrations.js";
 import { seedSampleReviews } from "./review/review.model.js";
-import { seedAdminUser } from "./users/user.model.js";
 
 const runSeed = async () => {
     try {
@@ -10,7 +9,6 @@ const runSeed = async () => {
 
         logger.info("Starting database seeding (sample records)...");
 
-        await seedAdminUser();
         await seedSampleReviews();
 
         logger.info("Sample records inserted successfully!");

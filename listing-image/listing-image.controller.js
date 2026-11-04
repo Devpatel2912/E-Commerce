@@ -15,15 +15,14 @@ const ListingImageController = {
     presignListingImageUpload: async (req, res, next) => {
         try {
             const userId = getAuthUserId(req);
-            const { listing_id, filename, content_type, file_size } = req.body;
+            const { listing_id, filename, content_type } = req.body;
 
             const data = await presignListingImageUploadService({
                 userId,
-                role: req.user?.role,
                 listing_id,
                 filename,
                 content_type,
-                file_size,
+                // file_size,
             });
 
             return res.status(200).json({
@@ -43,7 +42,6 @@ const ListingImageController = {
 
             const data = await completeListingImageUploadService({
                 userId,
-                role: req.user?.role,
                 listing_id,
                 object_key,
                 is_primary,
@@ -67,7 +65,6 @@ const ListingImageController = {
             const images = await retrieveListingImagesService({
                 listingId,
                 userId,
-                role: req.user?.role,
             });
 
             return res.status(200).json({
@@ -89,7 +86,6 @@ const ListingImageController = {
 
             const deletedImage = await removeListingImageService({
                 userId,
-                role: req.user?.role,
                 imageId,
                 listingIdParam,
             });
@@ -112,7 +108,6 @@ const ListingImageController = {
             const data = await getListingImageAccessUrlService({
                 imageId,
                 userId,
-                role: req.user?.role,
             });
 
             return res.status(200).json({
@@ -135,7 +130,6 @@ const ListingImageController = {
 
             const data = await uploadListingImageService({
                 userId,
-                role: req.user?.role,
                 file: req.file,
                 listingId,
                 is_primary: req.body.is_primary,

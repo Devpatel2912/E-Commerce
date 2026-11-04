@@ -1,5 +1,6 @@
 import { Worker } from "bullmq";
-import { redisConnectionOptions } from "../config/redis.js";
+import config from "../config/env.js";
+import { redisConnectionOptions, isRedisAvailable } from "../config/redis.js";
 import { IMAGE_QUEUE_NAME } from "./image.queue.js";
 import {
     downloadStorageObjectBuffer,
@@ -107,7 +108,21 @@ export const processImageJob = async (job) => {
     }
 };
 
+export const processImageDirect = async (data) => {
+    return processImageJob({
+        id: `direct_${data.listingId}_${Date.now()}`,
+        data,
+    });
+};
+
 export const initImageWorker = () => {
+    if (!config.redis.enabled || !isRedisAvailable()) {
+        logger.info(
+            "[Worker] Redis is not active. Background worker disabled; using direct processing fallback.",
+        );
+        return null;
+    }
+
     const worker = new Worker(IMAGE_QUEUE_NAME, processImageJob, {
         connection: redisConnectionOptions,
         concurrency: 3,
@@ -125,11 +140,11 @@ export const initImageWorker = () => {
 
     worker.on("error", (err) => {
         const now = Date.now();
-        if (now - lastWorkerErrorTime > 10000) {
+        if (now - lastWorkerErrorTime > 60000) {
             lastWorkerErrorTime = now;
             const errDetail = err?.message || err?.code || String(err);
-            logger.error(
-                `[Worker] Worker error (${errDetail}). Ensure Redis is running.`,
+            logger.warn(
+                `[Worker] Background worker connection notice (${errDetail}). Ensure Redis is running.`,
             );
         }
     });

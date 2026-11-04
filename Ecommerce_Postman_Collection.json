@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "a1b2c3d4-e5f6-4789-9abc-0123456789ab",
         "name": "Ecommerce API Collection",
-        "description": "Complete Postman collection for the Ecommerce Express.js REST API, including Auth, Users, Categories, Listings, Listing Images, Search History, Payments, Transactions, Refunds, Reviews, Messages, and Admin endpoints.",
+        "description": "Postman collection for the Ecommerce Express.js REST API, including Auth, Users, Categories, Listings, Listing Images, Search History, Payments, Transactions, Refunds, and Reviews endpoints.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "variable": [
@@ -13,11 +13,6 @@
         },
         {
             "key": "accessToken",
-            "value": "",
-            "type": "string"
-        },
-        {
-            "key": "adminToken",
             "value": "",
             "type": "string"
         },
@@ -67,13 +62,13 @@
             "type": "string"
         },
         {
-            "key": "messageId",
-            "value": "1",
+            "key": "presignedUploadUrl",
+            "value": "",
             "type": "string"
         },
         {
-            "key": "chatUserId",
-            "value": "2",
+            "key": "uploadedObjectKey",
+            "value": "",
             "type": "string"
         }
     ],
@@ -255,59 +250,6 @@
                     ]
                 },
                 {
-                    "name": "Login (Admin)",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "if (pm.response.code === 200) {",
-                                    "    var json = pm.response.json();",
-                                    "    if (json.data && json.data.accessToken) {",
-                                    "        pm.collectionVariables.set('adminToken', json.data.accessToken);",
-                                    "    }",
-                                    "}"
-                                ]
-                            }
-                        }
-                    ],
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"admin123\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/auth/login",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "auth", "login"]
-                        },
-                        "description": "Login with Admin credentials (Admin / admin@gmail.com / admin123). Saves token to `adminToken` variable."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK (Admin Logged In)",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Login successful.\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"8\",\n      \"name\": \"Admin\",\n      \"email\": \"admin@gmail.com\",\n      \"created_at\": \"2026-10-21T06:28:24.310Z\",\n      \"updated_at\": \"2026-10-21T06:28:24.310Z\"\n    },\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n  },\n  \"success\": true\n}"
-                        }
-                    ]
-                },
-                {
                     "name": "Get Current User (Me)",
                     "request": {
                         "auth": {
@@ -474,7 +416,7 @@
                             "host": ["{{baseUrl}}"],
                             "path": ["api", "v1", "users", "{{userId}}"]
                         },
-                        "description": "Get specific user profile. User must be requesting their own profile unless admin."
+                        "description": "Get specific user profile. User must be requesting their own profile"
                     },
                     "response": [
                         {
@@ -1077,6 +1019,173 @@
             "name": "06. Listing Images",
             "item": [
                 {
+                    "name": "Presign Listing Image Upload",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    var res = pm.response.json();",
+                                    "    if (res.data) {",
+                                    "        if (res.data.upload_url) {",
+                                    "            pm.collectionVariables.set('presignedUploadUrl', res.data.upload_url);",
+                                    "        }",
+                                    "        if (res.data.object_key) {",
+                                    "            pm.collectionVariables.set('uploadedObjectKey', res.data.object_key);",
+                                    "        }",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"listing_id\": {{listingId}},\n  \"filename\": \"sample-product.jpg\",\n  \"content_type\": \"image/jpeg\",\n  \"file_size\": 1048576\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/listing-images/presign",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "listing-images", "presign"]
+                        },
+                        "description": "Generate a presigned upload URL to upload an image directly to S3 / Object Storage. Validates listing ownership, max 10 images limit, MIME type (JPEG, PNG, WebP), and file size (max 5MB)."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK",
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Presigned upload URL generated successfully.\",\n  \"data\": {\n    \"upload_url\": \"https://storage-endpoint.aws.neon.tech/products/listings/1/d7986884-2a6c-48c0-bc6f-530962372c3d.jpg?X-Amz-Algorithm=...\",\n    \"object_key\": \"listings/1/d7986884-2a6c-48c0-bc6f-530962372c3d.jpg\",\n    \"http_method\": \"PUT\",\n    \"expires_in\": 900,\n    \"required_headers\": {\n      \"Content-Type\": \"image/jpeg\"\n    }\n  }\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Upload Image to Storage (Presigned URL)",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "image/jpeg"
+                            }
+                        ],
+                        "body": {
+                            "mode": "file",
+                            "file": {
+                                "src": ""
+                            }
+                        },
+                        "url": {
+                            "raw": "{{presignedUploadUrl}}",
+                            "host": ["{{presignedUploadUrl}}"]
+                        },
+                        "description": "Direct binary upload to S3 / Object Storage using the presigned URL returned from 'Presign Listing Image Upload'. Set Body to 'Binary' or 'File' and select your JPEG/PNG/WebP image file."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK",
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "plain",
+                            "header": [],
+                            "body": ""
+                        }
+                    ]
+                },
+                {
+                    "name": "Complete Listing Image Upload",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var res = pm.response.json();",
+                                    "    if (res.data && res.data.image_id) {",
+                                    "        pm.collectionVariables.set('imageId', res.data.image_id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{accessToken}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"listing_id\": {{listingId}},\n  \"object_key\": \"{{uploadedObjectKey}}\",\n  \"is_primary\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/listing-images/complete",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "listing-images", "complete"]
+                        },
+                        "description": "Confirm that direct S3 upload completed. Verifies that the object exists in storage, validates image format/magic bytes and size, saves the image record to PostgreSQL, and queues background processing for EXIF/metadata stripping."
+                    },
+                    "response": [
+                        {
+                            "name": "201 Created",
+                            "status": "Created",
+                            "code": 201,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Listing image verified and saved successfully.\",\n  \"data\": {\n    \"image_id\": 3,\n    \"listing_id\": 1,\n    \"object_key\": \"listings/1/d7986884-2a6c-48c0-bc6f-530962372c3d.jpg\",\n    \"content_type\": \"image/jpeg\",\n    \"file_size\": 1048576,\n    \"is_primary\": true,\n    \"status\": \"pending\",\n    \"access_url\": \"https://storage-endpoint.aws.neon.tech/products/listings/1/d7986884-2a6c-48c0-bc6f-530962372c3d.jpg\"\n  }\n}"
+                        }
+                    ]
+                },
+                {
                     "name": "Get Listing Images",
                     "request": {
                         "auth": {
@@ -1102,7 +1211,7 @@
                                 "images"
                             ]
                         },
-                        "description": "Retrieve all images for a listing. Public users only see processed/completed images; owner and admin can also see pending images."
+                        "description": "Retrieve all images for a listing. Public users only see processed/completed images; listing owners can also see pending images."
                     },
                     "response": [
                         {
@@ -1147,7 +1256,7 @@
                                 "{{imageId}}"
                             ]
                         },
-                        "description": "Delete a specific image from a listing. Requires listing ownership or admin role. Automatically reassigns primary image if the primary was deleted."
+                        "description": "Delete a specific image from a listing. Requires listing ownership. Automatically reassigns primary image if the primary was deleted."
                     },
                     "response": [
                         {
@@ -2007,644 +2116,6 @@
                                 }
                             ],
                             "body": "{\n  \"success\": true,\n  \"message\": \"Review deleted successfully.\"\n}"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "12. Messages",
-            "item": [
-                {
-                    "name": "Send Message",
-                    "event": [
-                        {
-                            "listen": "test",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "if (pm.response.code === 201) {",
-                                    "    var json = pm.response.json();",
-                                    "    if (json.data && json.data.id) {",
-                                    "        pm.collectionVariables.set('messageId', json.data.id);",
-                                    "    }",
-                                    "}"
-                                ]
-                            }
-                        }
-                    ],
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"receiver_id\": 2,\n  \"content\": \"Hi! Is this item still available?\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/messages",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "messages"]
-                        },
-                        "description": "Send direct message to another user."
-                    },
-                    "response": [
-                        {
-                            "name": "201 Created",
-                            "status": "Created",
-                            "code": 201,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Message sent successfully.\",\n  \"data\": {\n    \"id\": \"1\",\n    \"sender_id\": \"3\",\n    \"receiver_id\": 2,\n    \"content\": \"Hi! Is this item still available?\",\n    \"is_read\": false,\n    \"created_at\": \"2026-10-21T06:58:00.000Z\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "List Conversations",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/messages/conversations",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "messages", "conversations"]
-                        },
-                        "description": "List conversations and recent chats for authenticated user."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Conversations retrieved successfully.\",\n  \"data\": [\n    {\n      \"partner_id\": \"2\",\n      \"partner_name\": \"heet\",\n      \"last_message\": \"Hi! Is this item still available?\",\n      \"unread_count\": 0\n    }\n  ]\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "List Conversation Messages",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/messages/conversation/{{chatUserId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "messages",
-                                "conversation",
-                                "{{chatUserId}}"
-                            ]
-                        },
-                        "description": "Get full message thread between logged-in user and specified user."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Messages retrieved successfully.\",\n  \"data\": [\n    {\n      \"id\": \"1\",\n      \"sender_id\": \"3\",\n      \"receiver_id\": \"2\",\n      \"content\": \"Hi! Is this item still available?\",\n      \"is_read\": false,\n      \"created_at\": \"2026-10-21T06:58:00.000Z\"\n    }\n  ]\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Mark Message as Read",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "PATCH",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/messages/{{messageId}}/read",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "messages",
-                                "{{messageId}}",
-                                "read"
-                            ]
-                        },
-                        "description": "Mark a received message as read."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Message marked as read.\",\n  \"data\": {\n    \"id\": \"1\",\n    \"is_read\": true\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Delete Message",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{accessToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "DELETE",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/messages/{{messageId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "messages", "{{messageId}}"]
-                        },
-                        "description": "Delete a sent message."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Message deleted successfully.\"\n}"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "13. Admin",
-            "item": [
-                {
-                    "name": "List Users (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/users?page=1&limit=10&role=user&search=",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "admin", "users"],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                },
-                                {
-                                    "key": "role",
-                                    "value": "user",
-                                    "description": "Optional filter: user | admin"
-                                },
-                                {
-                                    "key": "search",
-                                    "value": "",
-                                    "description": "Optional search across name/email"
-                                }
-                            ]
-                        },
-                        "description": "Admin user management: list users with role and search filters."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Users retrieved successfully.\",\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 7,\n    \"totalPages\": 1,\n    \"count\": 7\n  },\n  \"data\": [\n    {\n      \"id\": \"3\",\n      \"name\": \"parth\",\n      \"email\": \"parth@gmail.com\",\n      \"role\": \"user\",\n      \"created_at\": \"2026-10-20T10:00:00.000Z\"\n    }\n  ]\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Get User By ID (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "admin",
-                                "users",
-                                "{{userId}}"
-                            ]
-                        },
-                        "description": "Admin get user profile by ID."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"User details retrieved successfully.\",\n  \"data\": {\n    \"id\": \"3\",\n    \"name\": \"parth\",\n    \"email\": \"parth@gmail.com\",\n    \"role\": \"user\",\n    \"created_at\": \"2026-10-20T10:00:00.000Z\",\n    \"updated_at\": \"2026-10-20T10:00:00.000Z\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Edit User (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"role\": \"admin\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "admin",
-                                "users",
-                                "{{userId}}"
-                            ]
-                        },
-                        "description": "Admin edit user role (user/admin), name, or email."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"User updated successfully.\",\n  \"data\": {\n    \"id\": \"3\",\n    \"name\": \"parth\",\n    \"email\": \"parth@gmail.com\",\n    \"role\": \"admin\",\n    \"created_at\": \"2026-10-20T10:00:00.000Z\",\n    \"updated_at\": \"2026-10-21T07:00:00.000Z\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Delete User (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "DELETE",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/users/{{userId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "admin",
-                                "users",
-                                "{{userId}}"
-                            ]
-                        },
-                        "description": "Admin delete user account (cannot delete own admin account)."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"User account deleted successfully.\",\n  \"data\": {\n    \"id\": \"3\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "List Refunds (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/refunds?page=1&limit=10&status=requested",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "admin", "refunds"],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                },
-                                {
-                                    "key": "status",
-                                    "value": "requested",
-                                    "description": "Filter by status: requested, pending, processing, completed, failed, rejected"
-                                },
-                                {
-                                    "key": "user_id",
-                                    "value": "",
-                                    "description": "Optional filter by user ID"
-                                }
-                            ]
-                        },
-                        "description": "Admin view all customer refund requests."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Refunds retrieved successfully.\",\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 1,\n    \"totalPages\": 1,\n    \"count\": 1\n  },\n  \"data\": [\n    {\n      \"id\": \"1\",\n      \"payment_id\": \"1\",\n      \"user_id\": \"3\",\n      \"amount\": \"120000.00\",\n      \"status\": \"requested\",\n      \"reason\": \"Product was damaged during shipping\",\n      \"created_at\": \"2026-10-21T06:52:00.000Z\"\n    }\n  ]\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Get Refund By ID (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/refunds/{{refundId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "admin",
-                                "refunds",
-                                "{{refundId}}"
-                            ]
-                        },
-                        "description": "Admin view specific refund details."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Refund details retrieved successfully.\",\n  \"data\": {\n    \"id\": \"1\",\n    \"payment_id\": \"1\",\n    \"user_id\": \"3\",\n    \"amount\": \"120000.00\",\n    \"status\": \"requested\",\n    \"reason\": \"Product was damaged during shipping\",\n    \"created_at\": \"2026-10-21T06:52:00.000Z\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Issue Refund (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"payment_id\": 1,\n  \"amount\": 120000,\n  \"reason\": \"Administrative manual resolution\",\n  \"status\": \"completed\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/refunds",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["api", "v1", "admin", "refunds"]
-                        },
-                        "description": "Admin manually issue a refund for a payment."
-                    },
-                    "response": [
-                        {
-                            "name": "201 Created",
-                            "status": "Created",
-                            "code": 201,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Refund issued successfully.\",\n  \"data\": {\n    \"id\": \"2\",\n    \"payment_id\": \"1\",\n    \"amount\": \"120000.00\",\n    \"reason\": \"Administrative manual resolution\",\n    \"status\": \"completed\",\n    \"created_at\": \"2026-10-21T07:05:00.000Z\"\n  }\n}"
-                        }
-                    ]
-                },
-                {
-                    "name": "Update Refund Status (Admin)",
-                    "request": {
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{adminToken}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"status\": \"completed\",\n  \"reason\": \"Approved and refunded via manual wire transfer\",\n  \"provider_refund_id\": \"REFUND-TXN-109283\"\n}"
-                        },
-                        "url": {
-                            "raw": "{{baseUrl}}/api/v1/admin/refunds/{{refundId}}",
-                            "host": ["{{baseUrl}}"],
-                            "path": [
-                                "api",
-                                "v1",
-                                "admin",
-                                "refunds",
-                                "{{refundId}}"
-                            ]
-                        },
-                        "description": "Admin change refund status (e.g. to completed, rejected, processing, failed)."
-                    },
-                    "response": [
-                        {
-                            "name": "200 OK",
-                            "status": "OK",
-                            "code": 200,
-                            "_postman_previewlanguage": "json",
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"success\": true,\n  \"message\": \"Refund status updated to 'completed'.\",\n  \"data\": {\n    \"id\": \"1\",\n    \"status\": \"completed\",\n    \"reason\": \"Approved and refunded via manual wire transfer\",\n    \"provider_refund_id\": \"REFUND-TXN-109283\",\n    \"updated_at\": \"2026-10-21T07:07:00.000Z\"\n  }\n}"
                         }
                     ]
                 }

@@ -10,6 +10,18 @@ export const baseLogger = pino({
     formatters: {
         level: (label) => ({ level: label.toUpperCase() }),
     },
+    ...(!isProduction
+        ? {
+              transport: {
+                  target: "pino-pretty",
+                  options: {
+                      colorize: true,
+                      translateTime: "SYS:standard",
+                      ignore: "pid,hostname",
+                  },
+              },
+          }
+        : {}),
 });
 
 const formatArgs = (args) => {

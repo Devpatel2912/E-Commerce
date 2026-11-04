@@ -36,11 +36,9 @@ const hashToken = (token) =>
     crypto.createHash("sha256").update(token).digest("hex");
 
 const createAccessToken = (user) =>
-    jwt.sign(
-        { sub: String(user.id), email: user.email, role: user.role || "user" },
-        ACCESS_SECRET,
-        { expiresIn: ACCESS_EXPIRES_IN },
-    );
+    jwt.sign({ sub: String(user.id), email: user.email }, ACCESS_SECRET, {
+        expiresIn: ACCESS_EXPIRES_IN,
+    });
 
 const createRefreshToken = (user) =>
     jwt.sign(
@@ -88,7 +86,6 @@ const formatPublicUser = (user) => ({
     id: user.id,
     name: user.name,
     email: user.email,
-    role: user.role,
     created_at: user.created_at,
     updated_at: user.updated_at,
 });

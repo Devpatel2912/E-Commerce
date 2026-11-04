@@ -62,7 +62,6 @@ const deleteLocalFile = async (imageUrl) => {
 
 export const presignListingImageUploadService = async ({
     userId,
-    role,
     listing_id,
     filename,
     content_type,
@@ -77,8 +76,7 @@ export const presignListingImageUploadService = async ({
     }
 
     const isOwner = String(listing.user_id) === String(userId);
-    const isAdmin = role === "admin";
-    if (!isOwner && !isAdmin) {
+    if (!isOwner) {
         throw new ApiError(
             403,
             "You can only upload images for your own listings.",
@@ -118,7 +116,6 @@ export const presignListingImageUploadService = async ({
 
 export const completeListingImageUploadService = async ({
     userId,
-    role,
     listing_id,
     object_key,
     is_primary,
@@ -133,8 +130,7 @@ export const completeListingImageUploadService = async ({
     }
 
     const isOwner = String(listing.user_id) === String(userId);
-    const isAdmin = role === "admin";
-    if (!isOwner && !isAdmin) {
+    if (!isOwner) {
         throw new ApiError(
             403,
             "You can only manage images for your own listings.",
@@ -216,21 +212,15 @@ export const completeListingImageUploadService = async ({
     };
 };
 
-export const retrieveListingImagesService = async ({
-    listingId,
-    userId,
-    role,
-}) => {
+export const retrieveListingImagesService = async ({ listingId, userId }) => {
     const listing = await getListingById(listingId);
     if (!listing) {
         throw new ApiError(404, "Listing not found.");
     }
 
     const isOwner = userId && String(listing.user_id) === String(userId);
-    const isAdmin = role === "admin";
-
     if (listing.status !== LISTING_STATUS.ACTIVE) {
-        if (!isOwner && !isAdmin) {
+        if (!isOwner) {
             throw new ApiError(
                 404,
                 "Listing not found or is currently processing.",
@@ -238,7 +228,7 @@ export const retrieveListingImagesService = async ({
         }
     }
 
-    const includePending = Boolean(isOwner || isAdmin);
+    const includePending = Boolean(isOwner);
     const images = await getListingImages(listingId, includePending);
 
     const resolvedImages = await Promise.all(
@@ -262,7 +252,6 @@ export const retrieveListingImagesService = async ({
 
 export const removeListingImageService = async ({
     userId,
-    role,
     imageId,
     listingIdParam,
 }) => {
@@ -284,8 +273,7 @@ export const removeListingImageService = async ({
     }
 
     const isOwner = String(listing.user_id) === String(userId);
-    const isAdmin = role === "admin";
-    if (!isOwner && !isAdmin) {
+    if (!isOwner) {
         throw new ApiError(
             403,
             "You can only delete images from your own listings.",
@@ -308,11 +296,7 @@ export const removeListingImageService = async ({
     return deletedImage;
 };
 
-export const getListingImageAccessUrlService = async ({
-    imageId,
-    userId,
-    role,
-}) => {
+export const getListingImageAccessUrlService = async ({ imageId, userId }) => {
     const image = await getListingImageById(imageId);
     if (!image) {
         throw new ApiError(404, "Listing image not found.");
@@ -325,8 +309,7 @@ export const getListingImageAccessUrlService = async ({
 
     if (listing.status !== "active") {
         const isOwner = userId && String(listing.user_id) === String(userId);
-        const isAdmin = role === "admin";
-        if (!isOwner && !isAdmin) {
+        if (!isOwner) {
             throw new ApiError(403, "Access denied. Listing is not active.");
         }
     }
@@ -356,7 +339,6 @@ export const getListingImageAccessUrlService = async ({
 
 export const uploadListingImageService = async ({
     userId,
-    role,
     file,
     listingId,
     is_primary,
@@ -386,8 +368,7 @@ export const uploadListingImageService = async ({
     }
 
     const isOwner = String(listing.user_id) === String(userId);
-    const isAdmin = role === "admin";
-    if (!isOwner && !isAdmin) {
+    if (!isOwner) {
         throw new ApiError(
             403,
             "You can only upload images for your own listings.",

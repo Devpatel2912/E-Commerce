@@ -1,6 +1,4 @@
 import { Router } from "express";
-import multer from "multer";
-
 import ListingImageController from "./listing-image.controller.js";
 
 import {
@@ -15,21 +13,6 @@ import authMiddleware, {
 } from "../middleware/auth.middleware.js";
 
 const router = Router();
-
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024,
-        files: 1,
-    },
-});
-
-router.post(
-    "/upload",
-    authMiddleware,
-    upload.single("image"),
-    ListingImageController.uploadListingImage,
-);
 
 router.post(
     "/presign",

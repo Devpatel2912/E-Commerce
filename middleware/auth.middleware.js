@@ -25,7 +25,6 @@ const authMiddleware = (req, res, next) => {
         req.user = {
             id: decoded.sub,
             email: decoded.email,
-            role: decoded.role || "user",
         };
 
         next();
@@ -52,7 +51,6 @@ const optionalAuthMiddleware = (req, res, next) => {
             req.user = {
                 id: decoded.sub,
                 email: decoded.email,
-                role: decoded.role || "user",
             };
         }
     } catch {

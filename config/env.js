@@ -94,6 +94,7 @@ const PRESIGNED_URL_EXPIRES_IN = Number(
 const REDIS_HOST = getEnv("REDIS_HOST", "localhost");
 const REDIS_PORT = Number(getEnv("REDIS_PORT", "6379"));
 const REDIS_PASSWORD = getEnv("REDIS_PASSWORD", "");
+const REDIS_ENABLED = getEnv("REDIS_ENABLED", "true").toLowerCase() === "true";
 
 if (errors.length > 0) {
     const divider = "=".repeat(70);
@@ -159,6 +160,7 @@ export const config = Object.freeze({
         presignedUrlExpiresIn: PRESIGNED_URL_EXPIRES_IN,
     }),
     redis: Object.freeze({
+        enabled: REDIS_ENABLED,
         host: REDIS_HOST,
         port: REDIS_PORT,
         password: REDIS_PASSWORD || undefined,

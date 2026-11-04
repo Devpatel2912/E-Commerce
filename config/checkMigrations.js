@@ -20,7 +20,6 @@ const REQUIRED_TABLES = [
     "transactions",
     "refunds",
     "reviews",
-    "messages",
 ];
 
 export const assertDatabaseMigrated = async () => {

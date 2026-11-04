@@ -13,6 +13,10 @@ import authMiddleware, {
 } from "../middleware/auth.middleware.js";
 import ReviewController from "../review/review.controller.js";
 import ListingImageController from "../listing-image/listing-image.controller.js";
+import {
+    validatePresignRequest,
+    validateCompleteRequest,
+} from "../listing-image/listing-image.validation.js";
 
 import multer from "multer";
 
@@ -29,7 +33,9 @@ const uploadListingImages = multer({
 ]);
 
 const normalizeUploadedFiles = (req, _res, next) => {
-    if (req.files) {
+    if (Array.isArray(req.files)) {
+        // req.files is already an array of files
+    } else if (req.files && typeof req.files === "object") {
         const images = req.files.images || [];
         const singleImage = req.files.image || [];
         req.files = [...images, ...singleImage];
@@ -60,6 +66,25 @@ router.delete(
     authMiddleware,
     validateListingId,
     ListingImageController.removeListingImage,
+);
+
+router.post(
+    "/presign",
+    authMiddleware,
+    validatePresignRequest,
+    ListingImageController.presignListingImageUpload,
+);
+router.post(
+    "/images/presign",
+    authMiddleware,
+    validatePresignRequest,
+    ListingImageController.presignListingImageUpload,
+);
+router.post(
+    "/images/complete",
+    authMiddleware,
+    validateCompleteRequest,
+    ListingImageController.completeListingImageUpload,
 );
 
 router.post(

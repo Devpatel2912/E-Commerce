@@ -4,7 +4,7 @@ export const authenticateUSer = authMiddleware;
 
 export const requiedOwnUser = (req, res, next) => {
     if (!req.user?.id) {
-        return res.status(40).join({
+        return res.status(401).json({
             success: false,
             message: "Authentication is required.",
         });

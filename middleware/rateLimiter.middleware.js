@@ -3,7 +3,7 @@ import ApiError from "../utils/ApiError.js";
 
 import { ErrorCodes } from "../config/error.js";
 
-const rateLimitErrorHandler = (req, res, next, options) => {
+const rateLimitErrorHandler = (_req, _res, next, options) => {
     next(
         new ApiError(
             options.statusCode || 429,

@@ -12,12 +12,8 @@ services:
         environment:
             DB_HOST: db
             DB_PORT: 5432
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
         depends_on:
             db:
-                condition: service_healthy
-            redis:
                 condition: service_healthy
         networks:
             - ecommerce-network
@@ -44,25 +40,6 @@ services:
         networks:
             - ecommerce-network
 
-    redis:
-        image: redis:7-alpine
-        container_name: ecommerce-redis
-        restart: unless-stopped
-        ports:
-            - "6379:6379"
-        volumes:
-            - redis_data:/data
-        healthcheck:
-            test:
-                - CMD
-                - redis-cli
-                - ping
-            interval: 5s
-            timeout: 5s
-            retries: 5
-        networks:
-            - ecommerce-network
-
 networks:
     ecommerce-network:
         driver: bridge
@@ -70,5 +47,3 @@ networks:
 volumes:
     postgres_data:
         name: ecommerce_postgres_data
-    redis_data:
-        name: ecommerce_redis_data

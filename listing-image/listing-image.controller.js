@@ -4,7 +4,6 @@ import {
     retrieveListingImagesService,
     removeListingImageService,
     getListingImageAccessUrlService,
-    uploadListingImageService,
 } from "./listing-image.service.js";
 
 const getAuthUserId = (req) => {
@@ -118,33 +117,6 @@ const ListingImageController = {
             next(error);
         }
     },
-
-    uploadListingImage: async (req, res, next) => {
-        try {
-            const userId = getAuthUserId(req);
-            const listingId =
-                req.params.id ??
-                req.params.listingId ??
-                req.body.listing_id ??
-                req.body.listingId;
-
-            const data = await uploadListingImageService({
-                userId,
-                file: req.file,
-                listingId,
-                is_primary: req.body.is_primary,
-            });
-
-            return res.status(201).json({
-                success: true,
-                message:
-                    "Listing image uploaded successfully to Neon Object Storage.",
-                data,
-            });
-        } catch (error) {
-            next(error);
-        }
-    },
 };
 
 export const {
@@ -153,7 +125,6 @@ export const {
     retrieveListingImages,
     removeListingImage,
     getListingImageAccessUrl,
-    uploadListingImage,
 } = ListingImageController;
 
 export default ListingImageController;

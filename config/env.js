@@ -91,11 +91,6 @@ const PRESIGNED_URL_EXPIRES_IN = Number(
     getEnv("PRESIGNED_URL_EXPIRES_IN", "900"),
 );
 
-const REDIS_HOST = getEnv("REDIS_HOST", "localhost");
-const REDIS_PORT = Number(getEnv("REDIS_PORT", "6379"));
-const REDIS_PASSWORD = getEnv("REDIS_PASSWORD", "");
-const REDIS_ENABLED = getEnv("REDIS_ENABLED", "true").toLowerCase() === "true";
-
 if (errors.length > 0) {
     const divider = "=".repeat(70);
     process.stderr.write(`\n${divider}\n`);
@@ -158,12 +153,6 @@ export const config = Object.freeze({
         maxImageSizeBytes: MAX_IMAGE_SIZE_BYTES,
         maxImagesPerListing: MAX_IMAGES_PER_LISTING,
         presignedUrlExpiresIn: PRESIGNED_URL_EXPIRES_IN,
-    }),
-    redis: Object.freeze({
-        enabled: REDIS_ENABLED,
-        host: REDIS_HOST,
-        port: REDIS_PORT,
-        password: REDIS_PASSWORD || undefined,
     }),
 });
 

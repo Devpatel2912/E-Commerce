@@ -8,17 +8,13 @@ import {
 } from "./listing.model.js";
 import { getCategoryById } from "../category/category.model.js";
 import { createListingImage } from "../listing-image/listing-image.model.js";
-import { enqueueImageProcessingJob } from "../jobs/image.queue.js";
 import {
     uploadBufferToStorage,
     deleteStorageObject,
     generatePresignedDownloadUrl,
     MIME_TO_EXTENSION,
 } from "../config/storage.js";
-import {
-    LISTING_STATUS,
-    LISTING_IMAGE_STATUS,
-} from "../constants/status.constants.js";
+import { LISTING_STATUS } from "../constants/status.constants.js";
 import ApiError from "../utils/ApiError.js";
 import { ErrorCodes } from "../config/error.js";
 
@@ -47,7 +43,7 @@ export const createListingService = async ({ userId, data, files = [] }) => {
 
     const hasImages = Array.isArray(files) && files.length > 0;
     const initialStatus = hasImages
-        ? LISTING_STATUS.PROCESSING
+        ? LISTING_STATUS.ACTIVE
         : LISTING_STATUS.PENDING;
 
     const listing = await insertListing({
@@ -84,16 +80,6 @@ export const createListingService = async ({ userId, data, files = [] }) => {
                     contentType: file.mimetype,
                     fileSize: file.size || file.buffer.length,
                     isPrimary,
-                    status: LISTING_IMAGE_STATUS.PENDING,
-                });
-
-                // Enqueue background processing
-                await enqueueImageProcessingJob({
-                    listingId: listing.listing_id,
-                    objectKey,
-                    isPrimary,
-                    userId,
-                    imageId: imageRecord.image_id,
                 });
 
                 const accessUrl = await generatePresignedDownloadUrl({
@@ -120,7 +106,7 @@ export const createListingService = async ({ userId, data, files = [] }) => {
         ...listing,
         images: uploadedImages,
         message: hasImages
-            ? "Listing created successfully. Images are queued for processing and metadata removal; listing will become active shortly."
+            ? "Listing created successfully with images."
             : "Listing created in pending state. Upload images to activate.",
     };
 };

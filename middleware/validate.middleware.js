@@ -1,6 +1,6 @@
 import ApiError from "../utils/ApiError.js";
 
-const validate = (validator) => (req, res, next) => {
+const validate = (validator) => (req, _res, next) => {
     const errors = validator(req.body || {});
 
     if (errors.length > 0) {

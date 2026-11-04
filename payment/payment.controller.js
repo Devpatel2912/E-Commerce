@@ -5,7 +5,7 @@ import {
 } from "./payment.service.js";
 
 const PaymentController = {
-    listPaymentMethods: (req, res) => {
+    listPaymentMethods: (_req, res) => {
         const data = listPaymentMethodsService();
         return res.status(200).json({
             success: true,

@@ -21,7 +21,7 @@ const CategoryController = {
         }
     },
 
-    getAllCategories: async (req, res, next) => {
+    getAllCategories: async (_req, res, next) => {
         try {
             const categories = await getAllCategoriesService();
 

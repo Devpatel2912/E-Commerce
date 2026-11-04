@@ -30,13 +30,6 @@ export const MIME_TO_EXTENSION = {
     "image/webp": "webp",
 };
 
-export const EXTENSION_TO_MIME = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    webp: "image/webp",
-};
-
 export const s3Client = new S3Client({
     region: STORAGE_REGION,
     endpoint: STORAGE_ENDPOINT,

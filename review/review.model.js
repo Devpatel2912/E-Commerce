@@ -69,13 +69,7 @@ export const seedSampleReviews = async () => {
     logger.info("Inserted 4 sample review records successfully.");
 };
 
-export const createReview = async ({
-    userId,
-    userID,
-    listingId,
-    rating,
-    comment,
-}) => {
+export const createReview = async ({ userId, listingId, rating, comment }) => {
     const query = `
     INSERT INTO reviews (user_id, listing_id, rating, comment)
     VALUES ($1, $2, $3, $4)
@@ -90,7 +84,7 @@ export const createReview = async ({
   `;
 
     const { rows } = await pool.query(query, [
-        userId || userID,
+        userId,
         listingId,
         rating,
         comment ?? null,

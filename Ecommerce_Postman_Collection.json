@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "a1b2c3d4-e5f6-4789-9abc-0123456789ab",
         "name": "Ecommerce API Collection",
-        "description": "Postman collection for the Ecommerce Express.js REST API, including Auth, Users, Categories, Listings, Listing Images, Search History, Payments, Transactions, Refunds, and Reviews endpoints.",
+        "description": "Postman collection for the Ecommerce Express.js REST API, including Auth, Users, Categories, Listings, Listing Images (via Cloud Object Storage), Search History, Payments, Transactions, Refunds, and Reviews endpoints.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "variable": [
@@ -1230,6 +1230,43 @@
                     ]
                 },
                 {
+                    "name": "Get Listing Image Access URL",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/listing-images/{{imageId}}/url",
+                            "host": ["{{baseUrl}}"],
+                            "path": [
+                                "api",
+                                "v1",
+                                "listing-images",
+                                "{{imageId}}",
+                                "url"
+                            ]
+                        },
+                        "description": "Retrieve a fresh presigned download/view URL for a specific listing image stored in Neon Object Storage."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK",
+                            "status": "OK",
+                            "code": 200,
+                            "_postman_previewlanguage": "json",
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"success\": true,\n  \"data\": {\n    \"image_id\": 1,\n    \"listing_id\": 1,\n    \"object_key\": \"listings/1/sample-uuid-1.jpg\",\n    \"access_url\": \"https://storage-endpoint.aws.neon.tech/products/listings/1/sample-uuid-1.jpg?X-Amz-Algorithm=...\",\n    \"expires_in\": 3600\n  }\n}"
+                        }
+                    ]
+                },
+                {
                     "name": "Delete Listing Image",
                     "request": {
                         "auth": {
@@ -1275,7 +1312,7 @@
                     ]
                 }
             ],
-            "description": "Endpoints for viewing and deleting images associated with a listing."
+            "description": "Endpoints for generating presigned upload URLs, directly uploading to cloud object storage, verifying upload completion, retrieving fresh access URLs, and viewing or deleting listing images."
         },
         {
             "name": "07. Search History",

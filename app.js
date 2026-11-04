@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import path from "node:path";
 import config from "./config/env.js";
 import apiRoutes from "./routes/index.js";
 import ApiError from "./utils/ApiError.js";
@@ -55,9 +54,7 @@ app.get("/api/v1/health", (_req, res) => {
 
 app.use("/api/v1", globalLimiter, apiRoutes);
 
-app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
-
-app.use((req, res, next) => {
+app.use((_req, _res, next) => {
     next(
         new ApiError(404, "API route not found.", {
             errorCode: ErrorCodes.ROUTE_NOT_FOUND,

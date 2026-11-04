@@ -1,4 +1,3 @@
-import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
 
@@ -15,7 +14,6 @@ import {
     getListingById,
     updateListingStatus,
 } from "../listing/listing.model.js";
-import { enqueueImageProcessingJob } from "../jobs/image.queue.js";
 
 import {
     generatePresignedUploadUrl,
@@ -23,42 +21,13 @@ import {
     getStorageObjectMetadata,
     verifyStorageObjectContent,
     deleteStorageObject,
-    uploadBufferToStorage,
-    detectImageMimeFromBytes,
-    ALLOWED_IMAGE_MIME_TYPES,
     MAX_IMAGE_SIZE_BYTES,
     MAX_IMAGES_PER_LISTING,
     PRESIGNED_URL_EXPIRES_IN,
     MIME_TO_EXTENSION,
 } from "../config/storage.js";
-import {
-    LISTING_STATUS,
-    LISTING_IMAGE_STATUS,
-} from "../constants/status.constants.js";
+import { LISTING_STATUS } from "../constants/status.constants.js";
 import ApiError from "../utils/ApiError.js";
-import logger from "../config/logger.js";
-
-const deleteLocalFile = async (imageUrl) => {
-    if (!imageUrl?.startsWith("/uploads/listing-images/")) {
-        return;
-    }
-
-    const filename = path.basename(imageUrl);
-    const filePath = path.resolve(
-        process.cwd(),
-        "uploads",
-        "listing-images",
-        filename,
-    );
-
-    try {
-        await fs.unlink(filePath);
-    } catch (error) {
-        if (error.code !== "ENOENT") {
-            logger.error("Local file deletion failed:", error);
-        }
-    }
-};
 
 export const presignListingImageUploadService = async ({
     userId,
@@ -183,20 +152,11 @@ export const completeListingImageUploadService = async ({
         contentType: verification.detectedMime || storageMeta.contentType,
         fileSize: storageMeta.contentLength,
         isPrimary: finalIsPrimary,
-        status: LISTING_IMAGE_STATUS.PENDING,
     });
 
     if (listing.status === LISTING_STATUS.PENDING) {
-        await updateListingStatus(listing_id, LISTING_STATUS.PROCESSING);
+        await updateListingStatus(listing_id, LISTING_STATUS.ACTIVE);
     }
-
-    await enqueueImageProcessingJob({
-        listingId: listing_id,
-        objectKey: object_key,
-        isPrimary: finalIsPrimary,
-        userId,
-        imageId: imageRecord.image_id,
-    });
 
     const accessUrl = await generatePresignedDownloadUrl({
         objectKey: object_key,
@@ -204,9 +164,6 @@ export const completeListingImageUploadService = async ({
 
     return {
         ...imageRecord,
-        status: "pending",
-        processing_message:
-            "Image queued for processing and metadata removal. Listing will become active upon completion.",
         access_url: accessUrl,
         image_url: accessUrl,
     };
@@ -284,10 +241,6 @@ export const removeListingImageService = async ({
         await deleteStorageObject(existingImage.object_key).catch(() => {});
     }
 
-    if (existingImage.image_url) {
-        await deleteLocalFile(existingImage.image_url);
-    }
-
     const deletedImage = await deleteListingImage(
         existingImage.image_id,
         existingImage.listing_id,
@@ -315,11 +268,7 @@ export const getListingImageAccessUrlService = async ({ imageId, userId }) => {
     }
 
     if (!image.object_key) {
-        return {
-            image_id: image.image_id,
-            access_url: image.image_url,
-            is_legacy_local: true,
-        };
+        throw new ApiError(404, "Listing image storage object not found.");
     }
 
     const expiresIn = 3600;
@@ -335,111 +284,4 @@ export const getListingImageAccessUrlService = async ({ imageId, userId }) => {
         access_url: accessUrl,
         expires_in: expiresIn,
     };
-};
-
-export const uploadListingImageService = async ({
-    userId,
-    file,
-    listingId,
-    is_primary,
-}) => {
-    if (!userId) {
-        throw new ApiError(401, "Authentication required.");
-    }
-
-    if (!file) {
-        throw new ApiError(
-            400,
-            "Please select an image file to upload under field name 'image'.",
-        );
-    }
-
-    const numericListingId = Number(listingId);
-    if (!Number.isSafeInteger(numericListingId) || numericListingId <= 0) {
-        throw new ApiError(
-            400,
-            "A valid positive integer listing ID is required.",
-        );
-    }
-
-    const listing = await getListingById(numericListingId);
-    if (!listing) {
-        throw new ApiError(404, "Listing not found.");
-    }
-
-    const isOwner = String(listing.user_id) === String(userId);
-    if (!isOwner) {
-        throw new ApiError(
-            403,
-            "You can only upload images for your own listings.",
-        );
-    }
-
-    const currentCount = await countListingImages(numericListingId);
-    if (currentCount >= MAX_IMAGES_PER_LISTING) {
-        throw new ApiError(
-            400,
-            `Maximum limit of ${MAX_IMAGES_PER_LISTING} images reached for this listing.`,
-        );
-    }
-
-    const detectedMime = detectImageMimeFromBytes(file.buffer);
-    if (!detectedMime || !ALLOWED_IMAGE_MIME_TYPES.has(detectedMime)) {
-        throw new ApiError(
-            400,
-            "Uploaded file is not a valid image. Only JPEG, PNG, and WebP images are allowed.",
-        );
-    }
-
-    const ext = MIME_TO_EXTENSION[detectedMime] || "jpg";
-    const uniqueId = crypto.randomUUID();
-    const objectKey = `listings/${numericListingId}/${uniqueId}.${ext}`;
-
-    try {
-        await uploadBufferToStorage({
-            objectKey,
-            buffer: file.buffer,
-            contentType: detectedMime,
-        });
-
-        const finalIsPrimary =
-            currentCount === 0 || is_primary === "true" || is_primary === true;
-
-        const imageRecord = await createListingImage({
-            listingId: numericListingId,
-            objectKey,
-            contentType: detectedMime,
-            fileSize: file.size || file.buffer.length,
-            isPrimary: finalIsPrimary,
-            status: "pending",
-        });
-
-        if (listing.status === "pending") {
-            await updateListingStatus(numericListingId, "processing");
-        }
-
-        await enqueueImageProcessingJob({
-            listingId: numericListingId,
-            objectKey,
-            isPrimary: finalIsPrimary,
-            userId,
-            imageId: imageRecord.image_id,
-        });
-
-        const accessUrl = await generatePresignedDownloadUrl({
-            objectKey,
-        });
-
-        return {
-            ...imageRecord,
-            status: "pending",
-            processing_message:
-                "Image uploaded and queued for processing. Listing will become active upon completion.",
-            access_url: accessUrl,
-            image_url: accessUrl,
-        };
-    } catch (error) {
-        await deleteStorageObject(objectKey).catch(() => {});
-        throw error;
-    }
 };

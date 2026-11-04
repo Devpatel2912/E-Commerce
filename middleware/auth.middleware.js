@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import ApiError from "../utils/ApiError.js";
 import config from "../config/env.js";
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = (req, _res, next) => {
     const authorization = req.headers.authorization;
 
     if (!authorization?.startsWith("Bearer ")) {
@@ -33,7 +33,7 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-const optionalAuthMiddleware = (req, res, next) => {
+const optionalAuthMiddleware = (req, _res, next) => {
     const authorization = req.headers.authorization;
 
     if (!authorization?.startsWith("Bearer ")) {

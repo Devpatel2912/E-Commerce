@@ -26,7 +26,7 @@ const ListingController = {
         }
     },
 
-    getAllListings: async (req, res, next) => {
+    getAllListings: async (_req, res, next) => {
         try {
             const listings = await getAllListingsService();
 

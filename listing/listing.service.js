@@ -17,6 +17,7 @@ import {
 import { LISTING_STATUS } from "../constants/status.constants.js";
 import ApiError from "../utils/ApiError.js";
 import { ErrorCodes } from "../config/error.js";
+import logger from "../config/logger.js";
 
 export const createListingService = async ({ userId, data, files = [] }) => {
     if (!userId) {
@@ -93,6 +94,10 @@ export const createListingService = async ({ userId, data, files = [] }) => {
                 });
             }
         } catch (uploadError) {
+            logger.error(
+                { listingId: listing.listing_id, err: uploadError },
+                "Failed to upload listing images. Rolling back created storage objects and listing.",
+            );
             // Clean up uploaded objects & remove created listing row to avoid incomplete records
             for (const key of createdObjectKeys) {
                 await deleteStorageObject(key).catch(() => {});

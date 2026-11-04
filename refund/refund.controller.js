@@ -4,6 +4,7 @@ import {
     getRefundDetailsService,
     processRefundService,
 } from "./refund.service.js";
+import logger from "../config/logger.js";
 
 function getUserId(req) {
     return req.user?.id ?? req.user?.userId;
@@ -14,6 +15,7 @@ const RefundController = {
         try {
             const userId = getUserId(req);
             const { payment_id, amount, reason } = req.body;
+            logger.info({ userId, payment_id, amount }, "Requesting refund.");
 
             const refund = await requestRefundService({
                 userId,
@@ -21,6 +23,11 @@ const RefundController = {
                 amount,
                 reason,
             });
+
+            logger.info(
+                { refundId: refund.id, userId },
+                "Refund request created successfully.",
+            );
 
             return res.status(201).json({
                 success: true,
@@ -34,7 +41,9 @@ const RefundController = {
 
     listRefunds: async (req, res, next) => {
         try {
-            const refunds = await listRefundsService(getUserId(req));
+            const userId = getUserId(req);
+            logger.debug({ userId }, "Listing user refunds.");
+            const refunds = await listRefundsService(userId);
 
             return res.status(200).json({
                 success: true,
@@ -48,9 +57,14 @@ const RefundController = {
 
     getRefundDetails: async (req, res, next) => {
         try {
+            const userId = getUserId(req);
+            logger.debug(
+                { refundId: req.params.id, userId },
+                "Getting refund details.",
+            );
             const refund = await getRefundDetailsService({
                 id: req.params.id,
-                userId: getUserId(req),
+                userId,
             });
 
             return res.status(200).json({
@@ -64,10 +78,20 @@ const RefundController = {
 
     processRefund: async (req, res, next) => {
         try {
+            const userId = getUserId(req);
+            logger.info(
+                { refundId: req.params.id, userId },
+                "Processing refund.",
+            );
             const refund = await processRefundService({
                 id: req.params.id,
-                userId: getUserId(req),
+                userId,
             });
+
+            logger.info(
+                { refundId: req.params.id, userId },
+                "Refund moved to processing successfully.",
+            );
 
             return res.status(200).json({
                 success: true,

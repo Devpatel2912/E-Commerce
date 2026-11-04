@@ -29,6 +29,9 @@ import {
 import { LISTING_STATUS } from "../constants/status.constants.js";
 import ApiError from "../utils/ApiError.js";
 
+import { addImageJob } from "../queue/image.producer.js";
+import { LISTING_IMAGE_STATUS } from "../constants/status.constants.js";
+
 export const presignListingImageUploadService = async ({
     userId,
     listing_id,
@@ -152,7 +155,10 @@ export const completeListingImageUploadService = async ({
         contentType: verification.detectedMime || storageMeta.contentType,
         fileSize: storageMeta.contentLength,
         isPrimary: finalIsPrimary,
+        status: LISTING_IMAGE_STATUS.PENDING,
     });
+
+    const job = await addImageJob(imageRecord.image_id, imageRecord.object_key);
 
     if (listing.status === LISTING_STATUS.PENDING) {
         await updateListingStatus(listing_id, LISTING_STATUS.ACTIVE);
@@ -164,6 +170,7 @@ export const completeListingImageUploadService = async ({
 
     return {
         ...imageRecord,
+        job_id: job.id,
         access_url: accessUrl,
         image_url: accessUrl,
     };

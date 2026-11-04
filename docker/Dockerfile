@@ -20,6 +20,8 @@ ENV NODE_ENV=production
 COPY --chown=node:node . .
 
 COPY --from=dependencies --chown=node:node /app/node_modules ./node_modules
+COPY --chown=node:node queue ./queue
+COPY --chown=node:node workers ./workers
 
 USER node
 

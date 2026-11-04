@@ -2,12 +2,17 @@ import {
     getMyTransactionsService,
     getTransactionDetailsService,
 } from "./transaction.service.js";
+import logger from "../config/logger.js";
 
 const TransactionController = {
     getMyTransactions: async (req, res, next) => {
         try {
             const { type, page, limit } = req.query;
             const userId = req.user.id;
+            logger.debug(
+                { userId, type, page, limit },
+                "Retrieving transactions for user.",
+            );
 
             const { transactions, pagination } = await getMyTransactionsService(
                 {
@@ -31,6 +36,10 @@ const TransactionController = {
 
     getTransactionDetails: async (req, res, next) => {
         try {
+            logger.debug(
+                { transactionId: req.params.id, userId: req.user.id },
+                "Retrieving transaction details.",
+            );
             const transaction = await getTransactionDetailsService({
                 transactionId: req.params.id,
                 userId: req.user.id,

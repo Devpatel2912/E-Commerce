@@ -3,18 +3,18 @@ node_modules
 .github
 .husky
 .env
-.env.*
+.env.
 env.example
 coverage
 dist
 .vscode
 .idea
-*.log
+.log
 npm-debug.log*
-.DS_Store
+DS_Store
 README.md
 API_FLOWS.md
-*.doc
-*.docx
+.doc
+.docx
 temp_doc
 

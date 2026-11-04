@@ -16,6 +16,7 @@ import {
 
 import ApiError from "../utils/ApiError.js";
 import config from "../config/env.js";
+import logger from "../config/logger.js";
 
 const ACCESS_SECRET = config.jwt.accessSecret;
 const REFRESH_SECRET = config.jwt.refreshSecret;
@@ -60,6 +61,10 @@ const getRefreshExpiry = (token) => {
 };
 
 const issueTokens = async (user) => {
+    logger.debug(
+        { userId: user.id },
+        "Issuing new access and refresh token pair.",
+    );
     const accessToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);
     const expiresAt = getRefreshExpiry(refreshToken);
@@ -130,9 +135,17 @@ export const loginService = async ({ email, password }) => {
 
     const user = await findUserByEmail(normalizedEmail);
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+        logger.warn(
+            { email: normalizedEmail },
+            "Login attempt rejected: Invalid credentials.",
+        );
         throw new ApiError(401, "Invalid email or password.");
     }
 
+    logger.debug(
+        { userId: user.id },
+        "Login credentials verified successfully.",
+    );
     const tokens = await issueTokens(user);
 
     return {
@@ -191,6 +204,7 @@ export const refreshService = async (oldToken) => {
 
 export const logoutService = async (refreshToken) => {
     if (refreshToken) {
+        logger.debug("Revoking refresh token on logout.");
         await revokeRefreshToken(hashToken(refreshToken));
     }
 

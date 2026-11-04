@@ -4,6 +4,7 @@ import {
     deleteSearchHistoryItemService,
     clearSearchHistoryService,
 } from "./search-history.service.js";
+import logger from "../config/logger.js";
 
 const getAuthUserId = (req) => {
     return req.user?.id ?? req.user?.user_id;
@@ -15,6 +16,10 @@ const SearchHistoryController = {
             const userId = getAuthUserId(req);
             const { keyword, category_id, min_price, max_price } =
                 req.body || {};
+            logger.debug(
+                { userId, keyword, category_id },
+                "Saving search history entry.",
+            );
 
             const createdRecord = await saveSearchHistoryService({
                 userId,
@@ -37,6 +42,7 @@ const SearchHistoryController = {
     getSearchHistory: async (req, res, next) => {
         try {
             const userId = getAuthUserId(req);
+            logger.debug({ userId }, "Retrieving search history.");
             const history = await getSearchHistoryService(userId);
 
             return res.status(200).json({
@@ -53,6 +59,10 @@ const SearchHistoryController = {
     deleteSearchHistoryItem: async (req, res, next) => {
         try {
             const userId = getAuthUserId(req);
+            logger.info(
+                { searchId: req.params.id, userId },
+                "Deleting search history item.",
+            );
             const deletedRecord = await deleteSearchHistoryItemService({
                 searchId: req.params.id,
                 userId,
@@ -71,6 +81,7 @@ const SearchHistoryController = {
     clearSearchHistory: async (req, res, next) => {
         try {
             const userId = getAuthUserId(req);
+            logger.info({ userId }, "Clearing all search history.");
             const deletedCount = await clearSearchHistoryService(userId);
 
             return res.status(200).json({

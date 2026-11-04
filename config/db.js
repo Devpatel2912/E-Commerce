@@ -13,6 +13,10 @@ export const pool = new Pool({
     ssl: config.db.ssl,
 });
 
+pool.on("connect", () => {
+    logger.debug("New PostgreSQL client connected to pool.");
+});
+
 pool.on("error", (error) => {
     logger.error("Unexpected PostgreSQL pool error:", error);
 });

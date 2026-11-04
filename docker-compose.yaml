@@ -3,6 +3,7 @@ services:
         build:
             context: .
             dockerfile: docker/Dockerfile
+        image: ecommerce-backend:latest
         container_name: e-commerce-backend
         restart: unless-stopped
         ports:
@@ -12,8 +13,32 @@ services:
         environment:
             DB_HOST: db
             DB_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
         depends_on:
             db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - ecommerce-network
+
+    worker:
+        image: ecommerce-backend:latest
+        container_name: ecommerce-worker
+        restart: unless-stopped
+        command: ["node", "workers/image.worker.js"]
+        env_file:
+            - .env
+        environment:
+            DB_HOST: db
+            DB_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
                 condition: service_healthy
         networks:
             - ecommerce-network
@@ -40,6 +65,21 @@ services:
         networks:
             - ecommerce-network
 
+    redis:
+        image: redis:7-alpine
+        container_name: ecommerce-redis
+        restart: unless-stopped
+        command: redis-server --appendonly yes
+        volumes:
+            - redis_data:/data
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 5s
+            timeout: 3s
+            retries: 10
+        networks:
+            - ecommerce-network
+
 networks:
     ecommerce-network:
         driver: bridge
@@ -47,3 +87,5 @@ networks:
 volumes:
     postgres_data:
         name: ecommerce_postgres_data
+    redis_data:
+        name: ecommerce_redis_data

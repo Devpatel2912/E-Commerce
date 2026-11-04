@@ -5,6 +5,7 @@ import {
     updateReviewService,
     deleteReviewService,
 } from "./review.service.js";
+import logger from "../config/logger.js";
 
 const getUserId = (req) => req.user?.id;
 
@@ -13,6 +14,10 @@ const ReviewController = {
         try {
             const userId = getUserId(req);
             const { listing_id: listingId, rating, comment } = req.body;
+            logger.info(
+                { userId, listingId, rating },
+                "Submitting review for listing.",
+            );
 
             const review = await createReviewService({
                 userId,
@@ -20,6 +25,11 @@ const ReviewController = {
                 rating,
                 comment,
             });
+
+            logger.info(
+                { reviewId: review.id, userId, listingId },
+                "Review created successfully.",
+            );
 
             return res.status(201).json({
                 success: true,
@@ -35,6 +45,10 @@ const ReviewController = {
         try {
             const { id: listingId } = req.params;
             const { page, limit } = req.query;
+            logger.debug(
+                { listingId, page, limit },
+                "Fetching reviews for listing.",
+            );
 
             const data = await getListingReviewsService({
                 listingId,
@@ -54,6 +68,7 @@ const ReviewController = {
 
     getReview: async (req, res, next) => {
         try {
+            logger.debug({ reviewId: req.params.id }, "Fetching review by ID.");
             const review = await getReviewByIdService(req.params.id);
 
             return res.status(200).json({
@@ -71,6 +86,7 @@ const ReviewController = {
             const userId = getUserId(req);
             const { id: reviewId } = req.params;
             const { rating, comment } = req.body;
+            logger.info({ reviewId, userId, rating }, "Updating review.");
 
             const review = await updateReviewService({
                 reviewId,
@@ -78,6 +94,8 @@ const ReviewController = {
                 rating,
                 comment,
             });
+
+            logger.info({ reviewId, userId }, "Review updated successfully.");
 
             return res.status(200).json({
                 success: true,
@@ -93,11 +111,14 @@ const ReviewController = {
         try {
             const userId = getUserId(req);
             const { id: reviewId } = req.params;
+            logger.info({ reviewId, userId }, "Deleting review.");
 
             await deleteReviewService({
                 reviewId,
                 userId,
             });
+
+            logger.info({ reviewId, userId }, "Review deleted successfully.");
 
             return res.status(200).json({
                 success: true,

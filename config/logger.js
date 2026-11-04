@@ -2,7 +2,20 @@ import pino from "pino";
 import config from "./env.js";
 
 const isProduction = config.isProduction;
-const logLevel = isProduction ? "info" : "debug";
+const logFormat = (
+    process.env.LOG_FORMAT || (isProduction ? "json" : "pretty")
+).toLowerCase();
+const logLevel = process.env.LOG_LEVEL || (isProduction ? "info" : "debug");
+
+let isPrettyAvailable = false;
+if (logFormat === "pretty" && !isProduction) {
+    try {
+        import.meta.resolve("pino-pretty");
+        isPrettyAvailable = true;
+    } catch {
+        isPrettyAvailable = false;
+    }
+}
 
 export const baseLogger = pino({
     level: logLevel,
@@ -10,7 +23,7 @@ export const baseLogger = pino({
     formatters: {
         level: (label) => ({ level: label.toUpperCase() }),
     },
-    ...(!isProduction
+    ...(isPrettyAvailable
         ? {
               transport: {
                   target: "pino-pretty",

@@ -8,11 +8,14 @@ import {
     cookieOptions,
 } from "./auth.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import logger from "../config/logger.js";
 
 const AuthController = {
     register: async (req, res, next) => {
         try {
             const { name, email, password } = req.body;
+            logger.info({ email }, "Processing user registration request.");
+
             const {
                 user,
                 accessToken,
@@ -21,6 +24,11 @@ const AuthController = {
             } = await registerService({ name, email, password });
 
             res.cookie(REFRESH_COOKIE, refreshToken, resCookieOptions);
+
+            logger.info(
+                { userId: user.id, email: user.email },
+                "User registered successfully.",
+            );
 
             return res.status(201).json(
                 new ApiResponse(201, "Registration successful.", {
@@ -36,6 +44,8 @@ const AuthController = {
     login: async (req, res, next) => {
         try {
             const { email, password } = req.body;
+            logger.info({ email }, "Processing user login request.");
+
             const {
                 user,
                 accessToken,
@@ -44,6 +54,11 @@ const AuthController = {
             } = await loginService({ email, password });
 
             res.cookie(REFRESH_COOKIE, refreshToken, resCookieOptions);
+
+            logger.info(
+                { userId: user.id, email: user.email },
+                "User logged in successfully.",
+            );
 
             return res.status(200).json(
                 new ApiResponse(200, "Login successful.", {
@@ -59,6 +74,7 @@ const AuthController = {
     getMe: async (req, res, next) => {
         try {
             const userId = req.user?.id ?? req.user?.user_id;
+            logger.debug({ userId }, "Fetching current user profile.");
             const data = await getMeService(userId);
 
             return res
@@ -78,6 +94,8 @@ const AuthController = {
     refresh: async (req, res, next) => {
         try {
             const oldToken = req.cookies?.[REFRESH_COOKIE];
+            logger.debug("Processing token refresh request.");
+
             const {
                 accessToken,
                 refreshToken,
@@ -86,12 +104,15 @@ const AuthController = {
 
             res.cookie(REFRESH_COOKIE, refreshToken, resCookieOptions);
 
+            logger.info("Tokens refreshed successfully.");
+
             return res.status(200).json(
                 new ApiResponse(200, "Tokens refreshed successfully.", {
                     accessToken,
                 }),
             );
         } catch (error) {
+            logger.warn("Token refresh failed. Clearing refresh cookie.");
             res.clearCookie(REFRESH_COOKIE, cookieOptions);
             next(error);
         }
@@ -100,10 +121,14 @@ const AuthController = {
     logout: async (req, res, next) => {
         try {
             const refreshToken = req.cookies?.[REFRESH_COOKIE];
+            logger.info("Processing user logout request.");
+
             const { cookieOptions: clearOptions } =
                 await logoutService(refreshToken);
 
             res.clearCookie(REFRESH_COOKIE, clearOptions);
+
+            logger.info("User logged out successfully.");
 
             return res
                 .status(200)

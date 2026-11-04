@@ -29,10 +29,10 @@ app.use(
 
 app.set("trust proxy", config.trustProxy);
 
-app.use(httpLogger);
 app.use(cookieParser());
 app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(httpLogger);
 
 app.get("/", (_req, res) => {
     res.json({ message: "Welcome!" });

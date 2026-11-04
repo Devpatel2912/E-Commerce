@@ -45,6 +45,10 @@ export const generatePresignedUploadUrl = async ({
     contentType,
     expiresIn = PRESIGNED_URL_EXPIRES_IN,
 }) => {
+    logger.debug(
+        { objectKey, contentType, expiresIn },
+        "Generating presigned upload URL.",
+    );
     const command = new PutObjectCommand({
         Bucket: STORAGE_BUCKET,
         Key: objectKey,
@@ -71,6 +75,10 @@ export const uploadBufferToStorage = async ({
     buffer,
     contentType,
 }) => {
+    logger.debug(
+        { objectKey, size: buffer?.length, contentType },
+        "Uploading buffer to S3 storage.",
+    );
     const command = new PutObjectCommand({
         Bucket: STORAGE_BUCKET,
         Key: objectKey,

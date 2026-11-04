@@ -5,6 +5,7 @@ import {
     removeListingImageService,
     getListingImageAccessUrlService,
 } from "./listing-image.service.js";
+import logger from "../config/logger.js";
 
 const getAuthUserId = (req) => {
     return req.user?.id ?? req.user?.user_id;
@@ -15,14 +16,22 @@ const ListingImageController = {
         try {
             const userId = getAuthUserId(req);
             const { listing_id, filename, content_type } = req.body;
+            logger.info(
+                { userId, listing_id, filename, content_type },
+                "Generating presigned upload URL.",
+            );
 
             const data = await presignListingImageUploadService({
                 userId,
                 listing_id,
                 filename,
                 content_type,
-                // file_size,
             });
+
+            logger.info(
+                { userId, listing_id, objectKey: data.object_key },
+                "Presigned upload URL generated successfully.",
+            );
 
             return res.status(200).json({
                 success: true,
@@ -38,6 +47,10 @@ const ListingImageController = {
         try {
             const userId = getAuthUserId(req);
             const { listing_id, object_key, is_primary } = req.body;
+            logger.info(
+                { userId, listing_id, object_key },
+                "Confirming listing image upload.",
+            );
 
             const data = await completeListingImageUploadService({
                 userId,
@@ -45,6 +58,11 @@ const ListingImageController = {
                 object_key,
                 is_primary,
             });
+
+            logger.info(
+                { userId, listing_id, imageId: data.image_id },
+                "Listing image confirmed and saved successfully.",
+            );
 
             return res.status(201).json({
                 success: true,
@@ -60,6 +78,7 @@ const ListingImageController = {
         try {
             const listingId = req.params.listingId ?? req.params.id;
             const userId = getAuthUserId(req);
+            logger.debug({ listingId, userId }, "Retrieving listing images.");
 
             const images = await retrieveListingImagesService({
                 listingId,
@@ -82,12 +101,21 @@ const ListingImageController = {
             const userId = getAuthUserId(req);
             const imageId = req.params.imageId ?? req.params.id;
             const listingIdParam = req.params.listingId;
+            logger.info(
+                { userId, imageId, listingIdParam },
+                "Deleting listing image.",
+            );
 
             const deletedImage = await removeListingImageService({
                 userId,
                 imageId,
                 listingIdParam,
             });
+
+            logger.info(
+                { userId, imageId },
+                "Listing image deleted successfully.",
+            );
 
             return res.status(200).json({
                 success: true,
@@ -103,6 +131,10 @@ const ListingImageController = {
         try {
             const imageId = req.params.imageId ?? req.params.id;
             const userId = getAuthUserId(req);
+            logger.debug(
+                { imageId, userId },
+                "Generating download access URL for image.",
+            );
 
             const data = await getListingImageAccessUrlService({
                 imageId,

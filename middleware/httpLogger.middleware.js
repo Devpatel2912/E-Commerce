@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { pinoHttp } from "pino-http";
-import logger, { baseLogger } from "../config/logger.js";
+import logger from "../config/logger.js";
 import {
     createResponseEnvelope,
     createErrorEnvelope,
@@ -17,6 +16,11 @@ const SENSITIVE_KEYS = new Set([
     "current_password",
     "password_hash",
     "passwordhash",
+    "refreshtoken",
+    "accesstoken",
+    "token",
+    "authorization",
+    "secret",
 ]);
 
 export const sanitizeData = (data) => {
@@ -26,9 +30,11 @@ export const sanitizeData = (data) => {
     const sanitized = {};
 
     for (const [key, value] of Object.entries(data)) {
+        const lowerKey = key.toLowerCase();
         if (
-            SENSITIVE_KEYS.has(key.toLowerCase()) ||
-            key.toLowerCase().includes("password")
+            SENSITIVE_KEYS.has(lowerKey) ||
+            lowerKey.includes("password") ||
+            lowerKey.includes("secret")
         ) {
             sanitized[key] = "***";
         } else if (typeof value === "object" && value !== null) {
@@ -41,196 +47,176 @@ export const sanitizeData = (data) => {
     return sanitized;
 };
 
-const pinoHttpMiddleware = pinoHttp({
-    logger: baseLogger || logger,
-
-    customAttributeKeys: {
-        err: "error",
-    },
-
-    genReqId: (req, res) => {
-        const incoming = req.headers["x-request-id"];
-
-        const id =
-            typeof incoming === "string" && incoming.length > 0
-                ? incoming
-                : randomUUID();
-
-        res.setHeader("x-request-id", id);
-        req.id = id;
-        req.requestId = id;
-
-        return id;
-    },
-
-    customLogLevel: (_req, res, err) => {
-        if (err || res.statusCode >= 500) {
-            return "error";
-        }
-
-        if (res.statusCode >= 400) {
-            return "warn";
-        }
-
-        return "info";
-    },
-
-    customSuccessMessage: (req, res) =>
-        `${req.method} ${req.url} ${res.statusCode}`,
-
-    customErrorMessage: (req, res, err) =>
-        `${req.method} ${req.url} ${res.statusCode} - ${err.message}`,
-
-    customReceivedMessage: (req) => `Incoming ${req.method} ${req.url}`,
-
-    customProps: (req, res) => ({
-        params:
-            req.params && Object.keys(req.params).length > 0
-                ? req.params
-                : undefined,
-
-        query:
-            req.query && Object.keys(req.query).length > 0
-                ? req.query
-                : undefined,
-
-        requestBody:
-            req.body && Object.keys(req.body).length > 0
-                ? sanitizeData(req.body)
-                : undefined,
-
-        responseBody: res.responseBody
-            ? sanitizeData(res.responseBody)
-            : undefined,
-    }),
-});
-
 export const httpLogger = (req, res, next) => {
-    pinoHttpMiddleware(req, res, () => {
-        req.requestId = req.id;
-        res.setHeader("x-request-id", req.id);
+    const incomingId = req.headers["x-request-id"];
+    const requestId =
+        typeof incomingId === "string" && incomingId.length > 0
+            ? incomingId
+            : randomUUID();
 
-        const originalJson = res.json.bind(res);
-        const originalSend = res.send.bind(res);
+    req.id = requestId;
+    req.requestId = requestId;
+    res.setHeader("x-request-id", requestId);
 
-        res.envelope = (
-            data = null,
-            message = "Operation successful.",
-            statusCode = 200,
-            meta = {},
-        ) => {
-            const envelope = createResponseEnvelope({
+    const startTime = Date.now();
+
+    // Log the incoming request in JSON format
+    logger.info(
+        {
+            type: "request",
+            requestId,
+            method: req.method,
+            url: req.originalUrl || req.url,
+            ip: req.ip || req.socket?.remoteAddress,
+            userAgent: req.headers["user-agent"],
+            query:
+                req.query && Object.keys(req.query).length > 0
+                    ? req.query
+                    : undefined,
+            params:
+                req.params && Object.keys(req.params).length > 0
+                    ? req.params
+                    : undefined,
+            body:
+                req.body && Object.keys(req.body).length > 0
+                    ? sanitizeData(req.body)
+                    : undefined,
+        },
+        `Incoming Request: ${req.method} ${req.originalUrl || req.url}`,
+    );
+
+    const originalJson = res.json.bind(res);
+    const originalSend = res.send.bind(res);
+
+    res.envelope = (
+        data = null,
+        message = "Operation successful.",
+        statusCode = 200,
+        meta = {},
+    ) => {
+        const envelope = createResponseEnvelope({
+            statusCode,
+            message,
+            data,
+            requestId,
+            meta,
+        });
+
+        res.responseBody = envelope;
+        return originalJson(envelope);
+    };
+
+    res.json = (body) => {
+        let finalBody = body;
+
+        if (
+            body &&
+            typeof body === "object" &&
+            body.errors &&
+            body.errors.code
+        ) {
+            if (!body.errors.request_id) {
+                body.errors.request_id = requestId;
+            }
+        } else if (body instanceof ApiResponse) {
+            finalBody = body.toEnvelope(req);
+        } else if (body && typeof body === "object" && body.success === false) {
+            const statusCode = Number(body.statusCode || res.statusCode || 500);
+
+            finalBody = createErrorEnvelope({
                 statusCode,
-                message,
-                data,
-                requestId: req.id,
-                meta,
+                errorCode:
+                    body.errorCode ||
+                    body.code ||
+                    getDefaultErrorCode(statusCode),
+                message: body.message || "An error occurred.",
+                errors: body.errors || body.details || [],
+                details: body.details,
+                requestId,
             });
+        } else if (body && typeof body === "object" && body.success === true) {
+            const statusCode = Number(body.statusCode || res.statusCode || 200);
 
-            res.responseBody = envelope;
+            finalBody = createResponseEnvelope({
+                statusCode,
+                message: body.message || "Operation successful.",
+                data: body.data !== undefined ? body.data : null,
+                requestId,
+                pagination: body.pagination || null,
+                meta: body.meta,
+            });
+        } else {
+            const statusCode = Number(res.statusCode || 200);
 
-            return originalJson(envelope);
-        };
-
-        res.json = (body) => {
-            let finalBody = body;
-
-            if (
-                body &&
-                typeof body === "object" &&
-                body.errors &&
-                body.errors.code
-            ) {
-                if (!body.errors.request_id) {
-                    body.errors.request_id = req.id;
-                }
-            } else if (body instanceof ApiResponse) {
-                finalBody = body.toEnvelope(req);
-            } else if (
-                body &&
-                typeof body === "object" &&
-                body.success === false
-            ) {
-                const statusCode = Number(
-                    body.statusCode || res.statusCode || 500,
-                );
-
+            if (statusCode >= 400) {
                 finalBody = createErrorEnvelope({
                     statusCode,
                     errorCode:
-                        body.errorCode ||
-                        body.code ||
+                        body?.errorCode ||
+                        body?.code ||
                         getDefaultErrorCode(statusCode),
-                    message: body.message || "An error occurred.",
-                    errors: body.errors || body.details || [],
-                    details: body.details,
-                    requestId: req.id,
-                });
-            } else if (
-                body &&
-                typeof body === "object" &&
-                body.success === true
-            ) {
-                const statusCode = Number(
-                    body.statusCode || res.statusCode || 200,
-                );
-
-                finalBody = createResponseEnvelope({
-                    statusCode,
-                    message: body.message || "Operation successful.",
-                    data: body.data !== undefined ? body.data : null,
-                    requestId: req.id,
-                    pagination: body.pagination || null,
-                    meta: body.meta,
+                    message:
+                        typeof body === "string"
+                            ? body
+                            : body?.message || "An error occurred.",
+                    errors: Array.isArray(body) ? body : body?.errors || [],
+                    details: body?.details,
+                    requestId,
                 });
             } else {
-                const statusCode = Number(res.statusCode || 200);
-
-                if (statusCode >= 400) {
-                    finalBody = createErrorEnvelope({
-                        statusCode,
-                        errorCode:
-                            body?.errorCode ||
-                            body?.code ||
-                            getDefaultErrorCode(statusCode),
-                        message:
-                            typeof body === "string"
-                                ? body
-                                : body?.message || "An error occurred.",
-                        errors: Array.isArray(body) ? body : body?.errors || [],
-                        details: body?.details,
-                        requestId: req.id,
-                    });
-                } else {
-                    finalBody = createResponseEnvelope({
-                        statusCode,
-                        message: body?.message || "Operation successful.",
-                        data: body !== undefined ? body : null,
-                        requestId: req.id,
-                    });
-                }
+                finalBody = createResponseEnvelope({
+                    statusCode,
+                    message: body?.message || "Operation successful.",
+                    data: body !== undefined ? body : null,
+                    requestId,
+                });
             }
+        }
 
-            res.responseBody = finalBody;
+        res.responseBody = finalBody;
+        return originalJson(finalBody);
+    };
 
-            return originalJson(finalBody);
+    res.send = (chunk) => {
+        if (!res.responseBody && chunk) {
+            try {
+                res.responseBody =
+                    typeof chunk === "string" ? JSON.parse(chunk) : chunk;
+            } catch {
+                res.responseBody = chunk;
+            }
+        }
+
+        return originalSend(chunk);
+    };
+
+    // Log the outgoing response in JSON format upon completion
+    res.on("finish", () => {
+        const durationMs = Date.now() - startTime;
+        const statusCode = res.statusCode;
+
+        const responseLog = {
+            type: "response",
+            requestId,
+            method: req.method,
+            url: req.originalUrl || req.url,
+            statusCode,
+            durationMs,
+            body: res.responseBody ? sanitizeData(res.responseBody) : undefined,
         };
 
-        res.send = (chunk) => {
-            if (!res.responseBody && chunk) {
-                try {
-                    res.responseBody =
-                        typeof chunk === "string" ? JSON.parse(chunk) : chunk;
-                } catch {
-                    res.responseBody = chunk;
-                }
-            }
+        const summary = `Outgoing Response: ${req.method} ${req.originalUrl || req.url} ${statusCode} (${durationMs}ms)`;
 
-            return originalSend(chunk);
-        };
-
-        next();
+        if (statusCode >= 500) {
+            logger.error(responseLog, summary);
+        } else if (statusCode >= 400) {
+            logger.warn(responseLog, summary);
+        } else {
+            logger.info(responseLog, summary);
+        }
     });
+
+    next();
 };
 
 export default httpLogger;

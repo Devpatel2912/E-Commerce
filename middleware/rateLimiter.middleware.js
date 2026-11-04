@@ -1,9 +1,19 @@
 import rateLimit from "express-rate-limit";
 import ApiError from "../utils/ApiError.js";
-
+import logger from "../config/logger.js";
 import { ErrorCodes } from "../config/error.js";
 
-const rateLimitErrorHandler = (_req, _res, next, options) => {
+const rateLimitErrorHandler = (req, _res, next, options) => {
+    logger.warn(
+        {
+            requestId: req.id,
+            ip: req.ip,
+            path: req.originalUrl || req.url,
+            statusCode: options.statusCode || 429,
+        },
+        "Rate limit exceeded.",
+    );
+
     next(
         new ApiError(
             options.statusCode || 429,

@@ -16,6 +16,17 @@ const startServer = async () => {
             );
         });
 
+        server.on("error", (err) => {
+            if (err.code === "EADDRINUSE") {
+                logger.error(
+                    `Port ${config.port} is already in use! A container (such as Docker 'e-commerce-backend') or another process is already occupying this port.`,
+                );
+            } else {
+                logger.error("HTTP Server encountered an error:", err);
+            }
+            process.exit(1);
+        });
+
         const shutdown = async (signal) => {
             logger.info(`Received ${signal}. Shutting down gracefully...`);
             server.close(() => {
@@ -26,6 +37,15 @@ const startServer = async () => {
 
         process.on("SIGINT", () => shutdown("SIGINT"));
         process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+        process.on("unhandledRejection", (reason) => {
+            logger.error({ reason }, "Unhandled Promise Rejection detected.");
+        });
+
+        process.on("uncaughtException", (error) => {
+            logger.error({ error }, "Uncaught Exception detected.");
+            process.exit(1);
+        });
     } catch (error) {
         logger.error("Failed to start server:", error);
         process.exit(1);

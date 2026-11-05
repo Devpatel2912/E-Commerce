@@ -55,7 +55,6 @@ const processImageJob = async (job) => {
             status: LISTING_IMAGE_STATUS.PROCESSING,
         });
 
-        //Download original image from Neon Object Storage
         const imageBuffer = await downloadStorageObjectBuffer(objectKey);
 
         //Validate image size

@@ -3,7 +3,6 @@ import { imageQueue } from "./image.queue.js";
 
 export const addImageJob = async (listingImageId, objectKey) => {
     try {
-        // Add image processing job to BullMQ
         const job = await imageQueue.add("process-listing-image", {
             listingImageId,
             objectKey,
@@ -18,7 +17,6 @@ export const addImageJob = async (listingImageId, objectKey) => {
             "Image processing job added to queue",
         );
 
-        // Return job so service can access job.id
         return job;
     } catch (error) {
         logger.error(

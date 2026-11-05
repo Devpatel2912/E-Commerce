@@ -1,29 +1,35 @@
 import logger from "../config/logger.js";
 import { imageQueue } from "./image.queue.js";
 
-export const addImageJob = async (listingImageId, objectkey) => {
+export const addImageJob = async (listingImageId, objectKey) => {
     try {
+        // Add image processing job to BullMQ
         const job = await imageQueue.add("process-listing-image", {
             listingImageId,
-            objectkey,
+            objectKey,
         });
 
         logger.info(
             {
                 jobId: job.id,
                 listingImageId,
-                objectkey,
+                objectKey,
             },
             "Image processing job added to queue",
         );
+
+        // Return job so service can access job.id
+        return job;
     } catch (error) {
         logger.error(
             {
                 err: error,
                 listingImageId,
+                objectKey,
             },
             "Failed to add image processing job",
         );
+
         throw error;
     }
 };

@@ -2,7 +2,6 @@ import { Worker, UnrecoverableError } from "bullmq";
 
 import redisConnection from "../queue/redis.js";
 import logger from "../config/logger.js";
-
 import pool from "../config/db.js";
 
 import {
@@ -20,13 +19,14 @@ import {
 import { LISTING_IMAGE_STATUS } from "../constants/status.constants.js";
 
 const processImageJob = async (job) => {
-    const { listingImageId, objectKey } = job.data;
+    const { listingImageId, objectKey } = job.data || {};
 
     try {
         logger.info(
             {
                 jobId: job.id,
                 listingImageId,
+                objectKey,
             },
             "Image processing started",
         );
@@ -50,7 +50,7 @@ const processImageJob = async (job) => {
             );
         }
 
-        //Update image status
+        //Update image status to PROCESSING
         await updateListingImageProcessing(listingImageId, {
             status: LISTING_IMAGE_STATUS.PROCESSING,
         });
@@ -60,13 +60,10 @@ const processImageJob = async (job) => {
 
         //Validate image size
         if (
+            !imageBuffer ||
             imageBuffer.length === 0 ||
             imageBuffer.length > MAX_IMAGE_SIZE_BYTES
         ) {
-            await updateListingImageProcessing(listingImageId, {
-                status: LISTING_IMAGE_STATUS.FAILED,
-            });
-
             throw new UnrecoverableError("Invalid image file size.");
         }
 
@@ -74,16 +71,12 @@ const processImageJob = async (job) => {
         const detectedMime = detectImageMimeFromBytes(imageBuffer);
 
         if (!detectedMime || !ALLOWED_IMAGE_MIME_TYPES.has(detectedMime)) {
-            await updateListingImageProcessing(listingImageId, {
-                status: LISTING_IMAGE_STATUS.FAILED,
-            });
-
             throw new UnrecoverableError(
                 "Unsupported or invalid image format.",
             );
         }
 
-        //Update PostgreSQL after successful processing
+        //Update PostgreSQL status to COMPLETED
         const updatedImage = await updateListingImageProcessing(
             listingImageId,
             {
@@ -92,6 +85,12 @@ const processImageJob = async (job) => {
                 contentType: detectedMime,
             },
         );
+
+        if (!updatedImage) {
+            throw new Error(
+                "Failed to update image processing status in PostgreSQL.",
+            );
+        }
 
         logger.info(
             {
@@ -109,31 +108,53 @@ const processImageJob = async (job) => {
             status: updatedImage.status,
         };
     } catch (error) {
-        // Permanent validation errors should not be retried
-        if (error instanceof UnrecoverableError) {
-            throw error;
-        }
-
         const maxAttempts = Number(job.opts.attempts || 1);
-        const isFinalAttempt = job.attemptsMade + 1 >= maxAttempts;
 
-        if (isFinalAttempt) {
+        //Unrecoverable errors are never retried
+        const isFinalAttempt =
+            error instanceof UnrecoverableError ||
+            job.attemptsMade + 1 >= maxAttempts;
+
+        //Update PostgreSQL status after failure
+        if (listingImageId) {
+            const nextStatus = isFinalAttempt
+                ? LISTING_IMAGE_STATUS.FAILED
+                : LISTING_IMAGE_STATUS.PENDING;
+
             await updateListingImageProcessing(listingImageId, {
-                status: LISTING_IMAGE_STATUS.FAILED,
+                status: nextStatus,
             }).catch((dbError) => {
                 logger.error(
-                    { err: dbError, listingImageId },
-                    "Failed to update image status after final attempt",
+                    {
+                        err: dbError,
+                        listingImageId,
+                        jobId: job.id,
+                    },
+                    "Failed to update image status after job failure",
                 );
             });
+        }
 
+        if (isFinalAttempt) {
             logger.error(
                 {
                     err: error,
                     jobId: job.id,
                     listingImageId,
+                    attemptsMade: job.attemptsMade,
                 },
                 "Image processing failed permanently",
+            );
+        } else {
+            logger.warn(
+                {
+                    err: error,
+                    jobId: job.id,
+                    listingImageId,
+                    attempt: job.attemptsMade + 1,
+                    maxAttempts,
+                },
+                "Image processing failed. Waiting for retry",
             );
         }
 
@@ -141,13 +162,11 @@ const processImageJob = async (job) => {
     }
 };
 
-// Create background worker
 const imageWorker = new Worker("image-processing", processImageJob, {
     connection: redisConnection,
     concurrency: 5,
 });
 
-// Job completed
 imageWorker.on("completed", (job, result) => {
     logger.info(
         {
@@ -158,13 +177,13 @@ imageWorker.on("completed", (job, result) => {
     );
 });
 
-// Job failed or waiting for retry
 imageWorker.on("failed", (job, error) => {
     const maxAttempts = Number(job?.opts?.attempts || 1);
+
     const isFinalAttempt =
         !job ||
-        job.attemptsMade >= maxAttempts ||
-        error instanceof UnrecoverableError;
+        error instanceof UnrecoverableError ||
+        job.attemptsMade >= maxAttempts;
 
     if (isFinalAttempt) {
         logger.error(
@@ -182,24 +201,28 @@ imageWorker.on("failed", (job, error) => {
                 attemptsMade: job.attemptsMade,
                 maxAttempts,
             },
-            "Image job failed. Waiting for retry",
+            "Background image job will retry",
         );
     }
 });
 
-// Worker connection error
 imageWorker.on("error", (error) => {
-    logger.error({ err: error }, "Image worker connection error");
+    logger.error(
+        {
+            err: error,
+        },
+        "Image worker connection error",
+    );
 });
 
-// Worker started
 logger.info("Image background worker started");
 
-// Graceful shutdown
 let isShuttingDown = false;
 
 const shutdown = async (signal) => {
-    if (isShuttingDown) return;
+    if (isShuttingDown) {
+        return;
+    }
 
     isShuttingDown = true;
 
@@ -207,12 +230,22 @@ const shutdown = async (signal) => {
 
     try {
         await imageWorker.close();
+
+        if (redisConnection.status !== "end") {
+            await redisConnection.quit();
+        }
         await pool.end();
 
         logger.info("Image worker shutdown completed");
+
         process.exit(0);
     } catch (error) {
-        logger.error({ err: error }, "Image worker shutdown failed");
+        logger.error(
+            {
+                err: error,
+            },
+            "Image worker shutdown failed",
+        );
 
         process.exit(1);
     }
